@@ -685,12 +685,12 @@ button.menu-sub-btn { flex: 1; padding: 8px; font-size: 11px; cursor: pointer; }
 
     hazardLayers["南海トラフ想定震度"] = L.tileLayer(
       'https://disaportaldata.gsi.go.jp/raster/06_shindo_namitrough/{z}/{x}/{y}.png',
-      { minZoom: 10, maxZoom: 17, maxNativeZoom: 17, opacity: 0.60, pane: 'hazardPane', attribution: hazardAttribution }
+      { minZoom: 2, maxZoom: 17, maxNativeZoom: 10, opacity: 0.60, pane: 'hazardPane', attribution: hazardAttribution }
     );
 
     hazardLayers["液状化危険度"] = L.tileLayer(
-      'https://disaportaldata.gsi.go.jp/raster/07_ekijouka/01/{z}/{x}/{y}.png',
-      { minZoom: 10, maxZoom: 17, maxNativeZoom: 17, opacity: 0.60, pane: 'hazardPane', attribution: hazardAttribution }
+      'https://disaportaldata.gsi.go.jp/raster/07_ekijouka_pref_data/22/{z}/{x}/{y}.png',
+      { minZoom: 2, maxZoom: 17, maxNativeZoom: 17, opacity: 0.60, pane: 'hazardPane', attribution: hazardAttribution }
     );
 
     // ★ 追加：ハザード凡例データ構造の定義
