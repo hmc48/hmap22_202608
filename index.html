@@ -227,6 +227,8 @@ button.menu-sub-btn { flex: 1; padding: 8px; font-size: 11px; cursor: pointer; }
     <label class="layer-item"><input type="checkbox" class="hazard-toggle" value="地すべり"> 地すべり</label>
     <label class="layer-item"><input type="checkbox" class="hazard-toggle" value="高潮浸水想定区域"> 高潮浸水想定区域</label>
     <label class="layer-item"><input type="checkbox" class="hazard-toggle" value="津波浸水想定"> 津波浸水想定</label>
+    <label class="layer-item"><input type="checkbox" class="hazard-toggle" value="南海トラフ想定震度"> 南海トラフ想定震度</label>
+    <label class="layer-item"><input type="checkbox" class="hazard-toggle" value="液状化危険度"> 液状化危険度</label>
     <div style="font-size:10px;color:#777;margin:4px 0 8px;">
       ※国土地理院・ハザードマップポータルサイトの配信データ
     </div>
@@ -330,7 +332,7 @@ button.menu-sub-btn { flex: 1; padding: 8px; font-size: 11px; cursor: pointer; }
     <a href="https://www.mhlw.go.jp/chosakuken/index.html" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation();">同利用規約</a><br>
     e-Stat国勢調査2020年<br>
     【災害ハザード】<br>
-    洪水（想定最大規模）、土石流、急傾斜地の崩壊、地すべり、高潮、津波<br>
+    洪水（想定最大規模）、土石流、急傾斜地の崩壊、地すべり、高潮、津波、南海トラフ想定震度、液状化危険度<br>
     出典：ハザードマップポータルサイト（国土地理院・国土交通省）<br>
     ※最新かつ詳細な情報は、各自治体のハザードマップもご確認ください。<br>
     【機能】<br>
@@ -681,6 +683,16 @@ button.menu-sub-btn { flex: 1; padding: 8px; font-size: 11px; cursor: pointer; }
       { minZoom: 2, maxZoom: 17, maxNativeZoom: 17, opacity: 0.55, pane: 'hazardPane', attribution: hazardAttribution }
     );
 
+    hazardLayers["南海トラフ想定震度"] = L.tileLayer(
+      'https://disaportaldata.gsi.go.jp/raster/06_shindo_namitrough/{z}/{x}/{y}.png',
+      { minZoom: 2, maxZoom: 17, maxNativeZoom: 17, opacity: 0.60, pane: 'hazardPane', attribution: hazardAttribution }
+    );
+
+    hazardLayers["液状化危険度"] = L.tileLayer(
+      'https://disaportaldata.gsi.go.jp/raster/07_ekijouka/{z}/{x}/{y}.png',
+      { minZoom: 2, maxZoom: 17, maxNativeZoom: 17, opacity: 0.60, pane: 'hazardPane', attribution: hazardAttribution }
+    );
+
     // ★ 追加：ハザード凡例データ構造の定義
     const hazardLegendData = {
       "洪水（想定最大規模）": [
@@ -695,6 +707,16 @@ button.menu-sub-btn { flex: 1; padding: 8px; font-size: 11px; cursor: pointer; }
         { color: "#ffb6c1", label: "1.0m〜3.0m" },
         { color: "#ff0000", label: "3.0m〜5.0m" },
         { color: "#a50021", label: "5.0m以上" }
+      ],
+      "南海トラフ想定震度": [
+        { color: "#a50021", label: "震度7" },
+        { color: "#ff0000", label: "震度6強" },
+        { color: "#ffb6c1", label: "震度6弱" },
+        { color: "#ffff80", label: "震度5強以下" }
+      ],
+      "液状化危険度": [
+        { color: "#c80000", label: "発生懸念が極めて高い" },
+        { color: "#fef001", label: "発生懸念が高い" }
       ],
       "高潮浸水想定区域": [
         { color: "#ffff80", label: "0.5m未満" },
