@@ -684,24 +684,33 @@ button.menu-sub-btn { flex: 1; padding: 8px; font-size: 11px; cursor: pointer; }
     // ★ 追加：ハザード凡例データ構造の定義
     const hazardLegendData = {
       "洪水（想定最大規模）": [
-        { color: "#f7f7f7", label: "0.5m未満" },
-        { color: "#ffb6c1", label: "0.5m〜3.0m" },
-        { color: "#ff0000", label: "3.0m〜5.0m" },
-        { color: "#a50021", label: "5.0m以上" }
+        { color: "#f7f5a9", label: "0.5m未満" },
+        { color: "#ffd8c0", label: "0.5m〜3.0m" },
+        { color: "#ffb7b7", label: "3.0m〜5.0m" },
+        { color: "#ff9191", label: "5.0m〜10.0m" },
+        { color: "#f285c9", label: "10.0m〜20.0m" },
+        { color: "#dc7adc", label: "20.0m以上" }
       ],
       "津波浸水想定": [
-        { color: "#ffff80", label: "0.3m未満" },
-        { color: "#f7f7f7", label: "0.3m〜1.0m" },
-        { color: "#ffb6c1", label: "1.0m〜3.0m" },
-        { color: "#ff0000", label: "3.0m〜5.0m" },
-        { color: "#a50021", label: "5.0m以上" }
+        { color: "#ffff80", label: "20m〜" },
+        { color: "#ffff80", label: "10m〜20m" },
+        { color: "#ffff80", label: "5m〜10m" },
+        { color: "#ffff80", label: "3m〜5m" },
+        { color: "#ffff80", label: "0.5m〜3m" },
+        { color: "#ffff80", label: "0.5m〜1m" },
+        { color: "#ffff80", label: "〜0.5m" },
+        { color: "#ffff80", label: "〜0.3m" }
       ],
       "高潮浸水想定区域": [
-        { color: "#ffff80", label: "0.5m未満" },
-        { color: "#ffb6c1", label: "0.5m〜3.0m" },
-        { color: "#ff0000", label: "3.0m〜5.0m" },
-        { color: "#a50021", label: "5.0m以上" }
-      ],
+        { color: "#ffff80", label: "20m〜" },
+        { color: "#ffff80", label: "10m〜20m" },
+        { color: "#ffff80", label: "5m〜10m" },
+        { color: "#ffff80", label: "3m〜5m" },
+        { color: "#ffff80", label: "0.5m〜3m" },
+        { color: "#ffff80", label: "0.5m〜1m" },
+        { color: "#ffff80", label: "〜0.5m" },
+        { color: "#ffff80", label: "〜0.3m" }
+      ],  
       "土石流警戒区域": [
         { color: "#c80000", label: "土石流特別警戒区域" },
         { color: "#fef001", label: "土石流警戒区域" }
