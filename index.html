@@ -202,8 +202,8 @@ button.menu-sub-btn { flex: 1; padding: 8px; font-size: 11px; cursor: pointer; }
     <button onclick="closeImagePanel()" style="width:100%; padding:5px; margin-top:5px; cursor:pointer;">閉じる</button>
   </div>
 
-  <div id="toggle-tools-btn" class="circle-btn" onclick="toggleRightTools()">🏠</div>
-  <div id="control-btn" class="circle-btn right-tool" onclick="togglePanel('controls')">🛠️</div>
+  <div id="toggle-tools-btn" class="circle-btn" title="ホーム" onclick="toggleRightTools()">🏠</div>
+  <div id="control-btn" class="circle-btn right-tool" title="設定、地図種類変更等" onclick="togglePanel('controls')">🛠️</div>
   <div id="controls">
     <span class="close-x" onclick="togglePanel('controls')">×</span>
     <div class="section-title">境界線の一括操作</div>
@@ -284,17 +284,17 @@ button.menu-sub-btn { flex: 1; padding: 8px; font-size: 11px; cursor: pointer; }
     <label class="layer-item"><input type="checkbox" class="facility-toggle" value="地域密着型通所介護"> 地域密着型通所介護</label>
 
   </div>
-  <div id="search-btn" class="circle-btn right-tool" onclick="togglePanel('search-panel')">🔍</div>
+  <div id="search-btn" class="circle-btn right-tool" title="医院等検索" onclick="togglePanel('search-panel')">🔍</div>
   <div id="search-panel">
     <input type="text" id="search-input" placeholder="and検索（例：内科 五反田）" style="width:100%; padding:10px; box-sizing:border-box; font-size:16px;">
     <button id="show-all-results-btn" style="width:100%; margin-top:10px; padding:8px; cursor:pointer; background:#28a745; color:white; border:none; border-radius:4px; font-weight:bold;">検索結果をすべて表示</button>
     <div id="search-results" style="max-height:200px; overflow-y:auto; margin-top:10px;"></div>
   </div>
   <div id="info-btn" class="circle-btn right-tool" onclick="togglePanel('info-panel')">i</div>
-  <div id="jump-btn" class="circle-btn right-tool" onclick="jumpToLocation()">📍</div>
+  <div id="jump-btn" class="circle-btn right-tool" title="住所検索" onclick="jumpToLocation()">📍</div>
   
-  <div id="route-btn" class="circle-btn right-tool" onclick="toggleRouteMode()">🚗</div>
-  <div id="reload-btn" class="circle-btn right-tool" onclick="confirmReload()">↩️</div>
+  <div id="route-btn" class="circle-btn right-tool" title="経路検索" onclick="toggleRouteMode()">🚗</div>
+  <div id="reload-btn" class="circle-btn right-tool" title="初期化" onclick="confirmReload()">↩️</div>
   
   <div id="route-panel">
     <span class="close-x" onclick="toggleRouteMode()">×</span>
