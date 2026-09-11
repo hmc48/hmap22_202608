@@ -821,6 +821,17 @@ button.menu-sub-btn { flex: 1; padding: 8px; font-size: 11px; cursor: pointer; }
     };
 
     // =====================================================
+    // 災害ハザードレイヤー
+    // 国土地理院・ハザードマップポータルサイト
+    // =====================================================
+    const hazardLayers = {};
+
+    // OSMの上、医療施設等の下に表示
+    map.createPane('hazardPane');
+    map.getPane('hazardPane').style.zIndex = 300;
+    map.getPane('hazardPane').style.pointerEvents = 'none';
+
+    // =====================================================
     // 災害ハザードマップ
     // 静岡県の都道府県コードは22（国土地理院公式オープンデータ）
     // =====================================================
@@ -829,48 +840,37 @@ button.menu-sub-btn { flex: 1; padding: 8px; font-size: 11px; cursor: pointer; }
 
     hazardLayers["洪水（想定最大規模）"] = L.tileLayer(
       'https://disaportaldata.gsi.go.jp/raster/01_flood_l2_shinsuishin_data/{z}/{x}/{y}.png',
-      { minZoom: 2, maxZoom: 17, opacity: 0.55, pane: 'hazardPane', attribution: hazardAttribution }
+      { minZoom: 2, maxZoom: 17, maxNativeZoom: 17, opacity: 0.55, pane: 'hazardPane', attribution: hazardAttribution }
     );
 
     hazardLayers["土石流警戒区域"] = L.tileLayer(
-      'https://disaportaldata.gsi.go.jp/raster/05_dosekiryukeikaikuiki_data/22/{z}/{x}/{y}.png',
-      { minZoom: 2, maxZoom: 17, opacity: 0.60, pane: 'hazardPane', attribution: hazardAttribution }
+      'https://disaportaldata.gsi.go.jp/raster/05_dosekiryukeikaikuiki/{z}/{x}/{y}.png',
+      { minZoom: 2, maxZoom: 17, maxNativeZoom: 17, opacity: 0.60, pane: 'hazardPane', attribution: hazardAttribution }
     );
 
     hazardLayers["急傾斜地の崩壊"] = L.tileLayer(
-      'https://disaportaldata.gsi.go.jp/raster/05_kyukeishakeikaikuiki_data/22/{z}/{x}/{y}.png',
-      { minZoom: 2, maxZoom: 17, opacity: 0.60, pane: 'hazardPane', attribution: hazardAttribution }
+      'https://disaportaldata.gsi.go.jp/raster/05_kyukeishakeikaikuiki/{z}/{x}/{y}.png',
+      { minZoom: 2, maxZoom: 17, maxNativeZoom: 17, opacity: 0.60, pane: 'hazardPane', attribution: hazardAttribution }
     );
 
     hazardLayers["地すべり"] = L.tileLayer(
-      'https://disaportaldata.gsi.go.jp/raster/05_jisuberikeikaikuiki_data/22/{z}/{x}/{y}.png',
-      { minZoom: 2, maxZoom: 17, opacity: 0.60, pane: 'hazardPane', attribution: hazardAttribution }
+      'https://disaportaldata.gsi.go.jp/raster/05_jisuberikeikaikuiki/{z}/{x}/{y}.png',
+      { minZoom: 2, maxZoom: 17, maxNativeZoom: 17, opacity: 0.60, pane: 'hazardPane', attribution: hazardAttribution }
     );
 
     hazardLayers["高潮浸水想定区域"] = L.tileLayer(
       'https://disaportaldata.gsi.go.jp/raster/03_hightide_l2_shinsuishin_pref_data/22/{z}/{x}/{y}.png',
-      { minZoom: 2, maxZoom: 17, opacity: 0.55, pane: 'hazardPane', attribution: hazardAttribution }
+      { minZoom: 2, maxZoom: 17, maxNativeZoom: 17, opacity: 0.55, pane: 'hazardPane', attribution: hazardAttribution }
     );
 
     hazardLayers["津波浸水想定"] = L.tileLayer(
       'https://disaportaldata.gsi.go.jp/raster/04_tsunami_newlegend_pref_data/22/{z}/{x}/{y}.png',
-      { minZoom: 2, maxZoom: 17, opacity: 0.55, pane: 'hazardPane', attribution: hazardAttribution }
+      { minZoom: 2, maxZoom: 17, maxNativeZoom: 17, opacity: 0.55, pane: 'hazardPane', attribution: hazardAttribution }
     );
 
     // 【旧】 const layerGroups = {}; を削除して、以下に書き換え
     const boundaryLayers = {};
     const facilityLayers = {};
-
-    // =====================================================
-    // 災害ハザードレイヤー
-    // 国土地理院・ハザードマップポータルサイト
-    // =====================================================
-    const hazardLayers = {};
-
-    // ハザードは境界線・医療施設の下に表示
-    map.createPane('hazardPane');
-    map.getPane('hazardPane').style.zIndex = 300;
-    map.getPane('hazardPane').style.pointerEvents = 'none';
 
     // =====================================================
     // 📍 住所／緯度経度ジャンプ機能（既存構造完全維持型）
@@ -2624,11 +2624,16 @@ fetch("geo_22_地域密着型通所介護.geojson")
     document.querySelectorAll('.hazard-toggle').forEach(cb => {
         cb.addEventListener('change', function() {
             const g = hazardLayers[this.value];
-            if (!g) return;
+            if (!g) {
+                console.error('災害レイヤー未登録:', this.value);
+                return;
+            }
             if (this.checked) {
                 g.addTo(map);
+                console.log('災害レイヤーON:', this.value);
             } else {
                 map.removeLayer(g);
+                console.log('災害レイヤーOFF:', this.value);
             }
         });
     });
