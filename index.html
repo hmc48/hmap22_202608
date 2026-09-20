@@ -250,10 +250,6 @@ button.menu-sub-btn { flex: 1; padding: 8px; font-size: 11px; cursor: pointer; }
     <label class="layer-item"><input type="radio" name="baseLayer" value="航空写真_1961_1969"> 1961～1969年</label>
     <label class="layer-item"><input type="radio" name="baseLayer" value="航空写真_1945_1950"> 1945～1950年</label>
     <div style="font-size:11px;font-weight:bold;color:#555;margin:7px 0 3px;">※地域により表示されません</div>
-    <button type="button" class="menu-sub-btn" id="oldMapBtn" style="width:100%;margin:5px 0 8px;">🗺️ 旧版地図（古地図）を開く</button>
-    <div style="font-size:10px;color:#777;margin:0 0 8px;">
-      ※旧版地図は国土地理院「地図・空中写真閲覧サービス」で閲覧します
-    </div>
     <div class="section-title">災害ハザード</div>
     <label class="layer-item"><input type="checkbox" class="hazard-toggle" value="洪水（想定最大規模）"> 洪水（想定最大規模）</label>
     <label class="layer-item"><input type="checkbox" class="hazard-toggle" value="土石流警戒区域"> 土石流警戒区域</label>
@@ -2564,14 +2560,7 @@ fetch("geo_22_地域密着型通所介護.geojson")
         document.getElementById("credit-title").innerText = creditText[this.value] || "";
       });
     });
-
-    // 旧版地図（古地図）は、国土地理院の「地図・空中写真閲覧サービス」で閲覧
-    // 旧版地図は年代別航空写真のような全国共通XYZタイルとして提供されていないため、
-    // 現在の地図上に無理に重ねず、公式の閲覧サービスを別タブで開く。
-    document.getElementById('oldMapBtn').addEventListener('click', function() {
-      window.open('https://service.gsi.go.jp/map-photos/app/map?search=history', '_blank', 'noopener');
-    });
-
+    
     function closeControlsPanel() {
       const controls = document.getElementById('controls');
       if (controls && controls.style.display === 'block') { controls.style.display = 'none'; }
