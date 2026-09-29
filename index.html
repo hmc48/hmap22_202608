@@ -3175,7 +3175,13 @@ fetch("geo_22_バス停留所.geojson")
                 page.style.aspectRatio = `${pageW}`;
                 const title=document.createElement('div');
                 title.className='print-page-title';
-                title.textContent=`静岡県 防災マップ　${pageNo} / ${totalPages}`;
+                // ★【追加】本日の日付を取得し、月日を2桁に揃える
+                const today = new Date();
+                const yyyy = today.getFullYear();
+                const mm = String(today.getMonth() + 1).padStart(2, '0');
+                const dd = String(today.getDate()).padStart(2, '0');
+                const formattedDate = `${yyyy}/${mm}/${dd}`;
+                title.textContent=`作成日: ${formattedDate} ${pageNo} / ${totalPages}`;
                 page.appendChild(title);
                 const mapDiv=document.createElement('div');
                 mapDiv.className='print-page-map';
