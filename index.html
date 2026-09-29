@@ -2956,6 +2956,39 @@ fetch("geo_22_バス停留所.geojson")
             if (layer instanceof L.TileLayer) {
                 return null; // タイルは後で現在の設定から複製
             }
+
+            // ユーザーが地図上に追加したテキスト・画像を複製する。
+            // これらはGeoJSONではなくL.Marker(L.DivIcon)なので、
+            // toGeoJSON()だけでは文字や画像の内容が失われる。
+            if (layer instanceof L.Marker) {
+                const el = layer.getElement && layer.getElement();
+                const isCustomText = !!(el && el.querySelector && el.querySelector('.custom-text-marker'));
+                const isCustomImage = !!(el && el.querySelector && el.querySelector('.map-added-image'));
+
+                if (isCustomText || isCustomImage) {
+                    const icon = layer.getIcon ? layer.getIcon() : null;
+                    if (!icon) return null;
+
+                    const opts = Object.assign({}, icon.options || {});
+                    // DOMから現在表示されているHTMLを取得。
+                    // これにより、画像の拡大縮小・回転やテキストの書式を保持する。
+                    opts.html = icon.options?.html || (el ? el.innerHTML : '');
+                    opts.className = icon.options?.className || '';
+                    opts.iconSize = icon.options?.iconSize || [0, 0];
+                    opts.iconAnchor = icon.options?.iconAnchor || [0, 0];
+
+                    const copy = L.marker(layer.getLatLng(), {
+                        icon: L.divIcon(opts),
+                        interactive: false,
+                        keyboard: false
+                    }).addTo(targetMap);
+
+                    return copy;
+                }
+
+                return null;
+            }
+
             if (layer instanceof L.GeoJSON || layer instanceof L.FeatureGroup) {
                 const gj = layer.toGeoJSON ? layer.toGeoJSON() : null;
                 if (gj) {
@@ -3121,11 +3154,27 @@ fetch("geo_22_バス停留所.geojson")
                     if(layer) cloneLayerForPrint(layer,pm);
                 });
 
-                // 現在地図上の描画物を可能な範囲で複製
+                // 現在地図上の描画物・ユーザー追加テキスト・画像を複製
                 map.eachLayer(layer=>{
                     if(layer instanceof L.Polyline || layer instanceof L.Polygon || layer instanceof L.Circle){
                         if(layer.options?.pane !== 'hazardPane' && layer.options?.pane !== 'boundaryPane'){
                             try { L.geoJSON(layer.toGeoJSON()).addTo(pm); } catch(e){}
+                        }
+                    }
+
+                    // 「Ｔ」で追加したテキスト、および画像ツールで追加したJPG等を
+                    // 印刷用地図にも同じ緯度経度で配置する。
+                    if(layer instanceof L.Marker){
+                        try {
+                            const el = layer.getElement && layer.getElement();
+                            const isCustomText = !!(el && el.querySelector && el.querySelector('.custom-text-marker'));
+                            const isCustomImage = !!(el && el.querySelector && el.querySelector('.map-added-image'));
+
+                            if(isCustomText || isCustomImage){
+                                cloneLayerForPrint(layer, pm);
+                            }
+                        } catch(e) {
+                            console.warn('テキスト・画像の印刷用複製失敗', e);
                         }
                     }
                 });
