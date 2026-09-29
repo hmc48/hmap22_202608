@@ -216,6 +216,9 @@ button.menu-sub-btn { flex: 1; padding: 8px; font-size: 11px; cursor: pointer; }
   .print-page {
     width:297mm; height:210mm; margin:0; box-shadow:none; page-break-after:always;
   }
+  .print-page.portrait {
+    width:210mm; height:297mm;
+  }
   .print-page:last-child { page-break-after:auto; }
   .print-close { display:none !important; }
 }
@@ -3011,9 +3014,21 @@ fetch("geo_22_バス停留所.geojson")
                 const y2=data.sw.y + (data.totalH/data.rows)*(r+1);
                 const mid=L.point((x1+x2)/2,(y1+y2)/2);
 
+                // 各A4ページが全体の1ページ分だけを表示するようズームを調整
+                const pagePixelW = data.totalW / data.cols;
+                const pagePixelH = data.totalH / data.rows;
+                const isPortrait = document.getElementById('print-orientation').value === 'portrait';
+                const pageCssW = isPortrait ? 793 : 1122;
+                const pageCssH = isPortrait ? 1122 : 793;
+                const scaleX = pageCssW / pagePixelW;
+                const scaleY = pageCssH / pagePixelH;
+                const pageZoom = data.zoom + Math.log2(Math.min(scaleX, scaleY));
+
                 const pm=L.map(mapDiv,{
                     center:map.unproject(mid,data.zoom),
-                    zoom:data.zoom,
+                    zoom:pageZoom,
+                    zoomSnap:0,
+                    zoomDelta:0.1,
                     zoomControl:false,
                     attributionControl:false,
                     preferCanvas:true,
