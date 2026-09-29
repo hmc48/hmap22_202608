@@ -3088,7 +3088,8 @@ fetch("geo_22_バス停留所.geojson")
     }
 
     async function createPosterPrint() {
-        closePrintGrid();
+        // 「① 印刷範囲を表示」で表示した境界線は残す。
+        // 分割印刷ページの作成時にも、同じ範囲を確認できるようにする。
         const data = getPrintBounds();
         const preview = document.getElementById('print-preview');
         const inner = document.getElementById('print-preview-inner');
@@ -3146,6 +3147,14 @@ fetch("geo_22_バス停留所.geojson")
                     keyboard:false,
                     touchZoom:false
                 });
+
+                // ハザードタイルは元の地図で「hazardPane」を使用している。
+                // 印刷用Leaflet地図にも同じPaneを作らないと、
+                // 洪水・津波・高潮などのタイルを追加できない。
+                pm.createPane('hazardPane');
+                pm.getPane('hazardPane').style.zIndex = 300;
+                pm.getPane('hazardPane').style.pointerEvents = 'none';
+
                 addPrintBaseLayer(pm);
 
                 // 現在ONになっている施設・境界線を複製
