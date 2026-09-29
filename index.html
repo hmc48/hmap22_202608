@@ -164,65 +164,6 @@ button.menu-sub-btn { flex: 1; padding: 8px; font-size: 11px; cursor: pointer; }
 .img-sample { width: 40px; height: 40px; cursor: pointer; border: 1px solid #ccc; object-fit: cover; }
 .img-sample:hover { border-color: #fd63db; }
 .editing-image { outline: 2px dashed #ff4500; cursor: move; }
-
-/* ===== 防災マップ分割印刷 ===== */
-#print-map-btn {
-  top: 290px; right: 15px; background:#198754; color:white;
-}
-#print-panel {
-  display:none; position:fixed; top:55px; right:65px; width:260px;
-  background:white; padding:12px; border-radius:8px; z-index:6000;
-  box-shadow:0 4px 15px rgba(0,0,0,0.25); font-size:13px;
-}
-#print-panel select, #print-panel button {
-  width:100%; box-sizing:border-box; padding:7px; margin-top:6px;
-}
-#print-grid-overlay {
-  display:none; position:fixed; left:0; top:0; width:100vw; height:100vh;
-  z-index:4500; pointer-events:none;
-}
-.print-grid-line {
-  position:absolute; background:#ff0000; opacity:.85;
-}
-.print-grid-label {
-  position:absolute; background:rgba(255,255,255,.9); color:#d00;
-  border:1px solid #d00; padding:2px 5px; font-weight:bold; font-size:12px;
-}
-#print-preview {
-  display:none; position:fixed; inset:0; z-index:10000; background:#777;
-  overflow:auto; padding:20px; box-sizing:border-box;
-}
-#print-preview-inner { display:flex; flex-direction:column; align-items:center; gap:18px; }
-.print-page {
-  width:1122px; height:793px; background:white; position:relative;
-  box-sizing:border-box; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,.35);
-}
-.print-page-title {
-  position:absolute; left:10px; top:8px; z-index:1000; background:rgba(255,255,255,.9);
-  padding:4px 8px; font-weight:bold; font-size:13px;
-}
-.print-page.portrait { width:793px; height:1122px; }
-.print-page-map { position:absolute; left:0; right:0; top:0; bottom:0; }
-.print-close {
-  position:fixed; right:20px; top:15px; z-index:11000; padding:8px 14px;
-  background:#dc3545; color:white; border:0; border-radius:5px; cursor:pointer;
-  font-size:14px;
-}
-.print-help { font-size:11px; color:#555; line-height:1.45; margin-top:6px; }
-@media print {
-  body > *:not(#print-preview) { display:none !important; }
-  #print-preview { display:block !important; position:static; padding:0; background:white; overflow:visible; }
-  #print-preview-inner { display:block; }
-  .print-page {
-    width:297mm; height:210mm; margin:0; box-shadow:none; page-break-after:always;
-  }
-  .print-page.portrait {
-    width:210mm; height:297mm;
-  }
-  .print-page:last-child { page-break-after:auto; }
-  .print-close { display:none !important; }
-}
-
 </style>
 </head>
 <body>
@@ -380,34 +321,6 @@ button.menu-sub-btn { flex: 1; padding: 8px; font-size: 11px; cursor: pointer; }
   
   <div id="route-btn" class="circle-btn right-tool" title="経路検索" onclick="toggleRouteMode()">🚗</div>
   <div id="reload-btn" class="circle-btn right-tool" title="初期化" onclick="confirmReload()">↩️</div>
-  <div id="print-map-btn" class="circle-btn right-tool" title="防災マップ印刷" onclick="togglePrintPanel()">🖨️</div>
-  <div id="print-panel">
-    <span class="close-x" onclick="togglePrintPanel()">×</span>
-    <div class="section-title">防災マップ印刷</div>
-    <div style="margin-top:8px;">分割数</div>
-    <select id="print-grid-size">
-      <option value="2x2">A4 4枚（2×2）</option>
-      <option value="3x3" selected>A4 9枚（3×3）</option>
-      <option value="4x4">A4 16枚（4×4）</option>
-    </select>
-    <div style="margin-top:8px;">用紙方向</div>
-    <select id="print-orientation">
-      <option value="landscape" selected>A4横</option>
-      <option value="portrait">A4縦</option>
-    </select>
-    <button onclick="showPrintGrid()" style="background:#198754;color:white;border:0;">① 印刷範囲を表示</button>
-    <button onclick="createPosterPrint()" style="background:#0d6efd;color:white;border:0;">② 分割印刷ページを作成</button>
-    <div class="print-help">
-      現在の地図範囲を基準に、A4ページへ分割します。<br>
-      先に地図を移動・拡大縮小して、印刷したい範囲を表示してください。<br>
-      「②」を押すと印刷用の9ページが表示されます。
-    </div>
-  </div>
-  <div id="print-grid-overlay"></div>
-  <div id="print-preview">
-    <button class="print-close" onclick="closePrintPreview()">閉じる</button>
-    <div id="print-preview-inner"></div>
-  </div>
   
   <div id="route-panel">
     <span class="close-x" onclick="toggleRouteMode()">×</span>
@@ -993,8 +906,6 @@ fetch("geo_22_1.geojson")
             const markerRadius = (shape === 'star') ? 12 : ((shape === 'circle') ? 5 : 8);
 
             return new L.CustomMarker(latlng, {
-                // 元画面では従来どおり同じRendererを使用。
-                // 印刷時だけcloneLayerForPrint()内で専用Rendererへ複製する。
                 renderer: myRenderer,
                 shape: shape,
                 radius: markerRadius,
@@ -1020,16 +931,8 @@ fetch("geo_22_1.geojson")
             });
         }
     });
-    // データ取得完了後、チェックボックスがONなら元地図へ追加。
-    const busOrFacilityCb = document.querySelector(`.${label === "バス停留所" ? "bus-toggle" : "facility-toggle"}[value="${label}"]`);
-    if (busOrFacilityCb && busOrFacilityCb.checked) {
-        facilityLayers["病院"].addTo(map);
-        setTimeout(() => {
-            if (myRenderer && myRenderer._requestRedraw) myRenderer._requestRedraw();
-        }, 50);
-    }
 })
-.catch(e => { console.error("GeoJSON読込エラー: 病院", e); });
+.catch(e => {});
 
 fetch("geo_22_2.geojson")
 .then(res => res.json())
@@ -1041,8 +944,6 @@ fetch("geo_22_2.geojson")
             const markerRadius = (shape === 'star') ? 12 : ((shape === 'circle') ? 5 : 8);
 
             return new L.CustomMarker(latlng, {
-                // 元画面では従来どおり同じRendererを使用。
-                // 印刷時だけcloneLayerForPrint()内で専用Rendererへ複製する。
                 renderer: myRenderer,
                 shape: shape,
                 radius: markerRadius,
@@ -1068,16 +969,8 @@ fetch("geo_22_2.geojson")
             });
         }
     });
-    // データ取得完了後、チェックボックスがONなら元地図へ追加。
-    const busOrFacilityCb = document.querySelector(`.${label === "バス停留所" ? "bus-toggle" : "facility-toggle"}[value="${label}"]`);
-    if (busOrFacilityCb && busOrFacilityCb.checked) {
-        facilityLayers["診療所"].addTo(map);
-        setTimeout(() => {
-            if (myRenderer && myRenderer._requestRedraw) myRenderer._requestRedraw();
-        }, 50);
-    }
 })
-.catch(e => { console.error("GeoJSON読込エラー: 診療所", e); });
+.catch(e => {});
 
 fetch("geo_22_3.geojson")
 .then(res => res.json())
@@ -1089,8 +982,6 @@ fetch("geo_22_3.geojson")
             const markerRadius = (shape === 'star') ? 12 : ((shape === 'circle') ? 5 : 8);
 
             return new L.CustomMarker(latlng, {
-                // 元画面では従来どおり同じRendererを使用。
-                // 印刷時だけcloneLayerForPrint()内で専用Rendererへ複製する。
                 renderer: myRenderer,
                 shape: shape,
                 radius: markerRadius,
@@ -1116,16 +1007,8 @@ fetch("geo_22_3.geojson")
             });
         }
     });
-    // データ取得完了後、チェックボックスがONなら元地図へ追加。
-    const busOrFacilityCb = document.querySelector(`.${label === "バス停留所" ? "bus-toggle" : "facility-toggle"}[value="${label}"]`);
-    if (busOrFacilityCb && busOrFacilityCb.checked) {
-        facilityLayers["歯科"].addTo(map);
-        setTimeout(() => {
-            if (myRenderer && myRenderer._requestRedraw) myRenderer._requestRedraw();
-        }, 50);
-    }
 })
-.catch(e => { console.error("GeoJSON読込エラー: 歯科", e); });
+.catch(e => {});
 
 fetch("geo_22_4.geojson")
 .then(res => res.json())
@@ -1137,8 +1020,6 @@ fetch("geo_22_4.geojson")
             const markerRadius = (shape === 'star') ? 12 : ((shape === 'circle') ? 5 : 8);
 
             return new L.CustomMarker(latlng, {
-                // 元画面では従来どおり同じRendererを使用。
-                // 印刷時だけcloneLayerForPrint()内で専用Rendererへ複製する。
                 renderer: myRenderer,
                 shape: shape,
                 radius: markerRadius,
@@ -1164,16 +1045,8 @@ fetch("geo_22_4.geojson")
             });
         }
     });
-    // データ取得完了後、チェックボックスがONなら元地図へ追加。
-    const busOrFacilityCb = document.querySelector(`.${label === "バス停留所" ? "bus-toggle" : "facility-toggle"}[value="${label}"]`);
-    if (busOrFacilityCb && busOrFacilityCb.checked) {
-        facilityLayers["助産院"].addTo(map);
-        setTimeout(() => {
-            if (myRenderer && myRenderer._requestRedraw) myRenderer._requestRedraw();
-        }, 50);
-    }
 })
-.catch(e => { console.error("GeoJSON読込エラー: 助産院", e); });
+.catch(e => {});
 
 fetch("geo_22_5.geojson")
 .then(res => res.json())
@@ -1185,8 +1058,6 @@ fetch("geo_22_5.geojson")
             const markerRadius = (shape === 'star') ? 12 : ((shape === 'circle') ? 5 : 8);
 
             return new L.CustomMarker(latlng, {
-                // 元画面では従来どおり同じRendererを使用。
-                // 印刷時だけcloneLayerForPrint()内で専用Rendererへ複製する。
                 renderer: myRenderer,
                 shape: shape,
                 radius: markerRadius,
@@ -1212,16 +1083,8 @@ fetch("geo_22_5.geojson")
             });
         }
     });
-    // データ取得完了後、チェックボックスがONなら元地図へ追加。
-    const busOrFacilityCb = document.querySelector(`.${label === "バス停留所" ? "bus-toggle" : "facility-toggle"}[value="${label}"]`);
-    if (busOrFacilityCb && busOrFacilityCb.checked) {
-        facilityLayers["薬局"].addTo(map);
-        setTimeout(() => {
-            if (myRenderer && myRenderer._requestRedraw) myRenderer._requestRedraw();
-        }, 50);
-    }
 })
-.catch(e => { console.error("GeoJSON読込エラー: 薬局", e); });
+.catch(e => {});
 
 fetch("geo_22_訪問介護.geojson")
 .then(res => res.json())
@@ -1233,8 +1096,6 @@ fetch("geo_22_訪問介護.geojson")
             const markerRadius = (shape === 'star') ? 12 : ((shape === 'circle') ? 5 : 8);
 
             return new L.CustomMarker(latlng, {
-                // 元画面では従来どおり同じRendererを使用。
-                // 印刷時だけcloneLayerForPrint()内で専用Rendererへ複製する。
                 renderer: myRenderer,
                 shape: shape,
                 radius: markerRadius,
@@ -1260,16 +1121,8 @@ fetch("geo_22_訪問介護.geojson")
             });
         }
     });
-    // データ取得完了後、チェックボックスがONなら元地図へ追加。
-    const busOrFacilityCb = document.querySelector(`.${label === "バス停留所" ? "bus-toggle" : "facility-toggle"}[value="${label}"]`);
-    if (busOrFacilityCb && busOrFacilityCb.checked) {
-        facilityLayers["訪問介護"].addTo(map);
-        setTimeout(() => {
-            if (myRenderer && myRenderer._requestRedraw) myRenderer._requestRedraw();
-        }, 50);
-    }
 })
-.catch(e => { console.error("GeoJSON読込エラー: 訪問介護", e); });
+.catch(e => {});
 
 fetch("geo_22_訪問入浴介護.geojson")
 .then(res => res.json())
@@ -1281,8 +1134,6 @@ fetch("geo_22_訪問入浴介護.geojson")
             const markerRadius = (shape === 'star') ? 12 : ((shape === 'circle') ? 5 : 8);
 
             return new L.CustomMarker(latlng, {
-                // 元画面では従来どおり同じRendererを使用。
-                // 印刷時だけcloneLayerForPrint()内で専用Rendererへ複製する。
                 renderer: myRenderer,
                 shape: shape,
                 radius: markerRadius,
@@ -1308,16 +1159,8 @@ fetch("geo_22_訪問入浴介護.geojson")
             });
         }
     });
-    // データ取得完了後、チェックボックスがONなら元地図へ追加。
-    const busOrFacilityCb = document.querySelector(`.${label === "バス停留所" ? "bus-toggle" : "facility-toggle"}[value="${label}"]`);
-    if (busOrFacilityCb && busOrFacilityCb.checked) {
-        facilityLayers["訪問入浴介護"].addTo(map);
-        setTimeout(() => {
-            if (myRenderer && myRenderer._requestRedraw) myRenderer._requestRedraw();
-        }, 50);
-    }
 })
-.catch(e => { console.error("GeoJSON読込エラー: 訪問入浴介護", e); });
+.catch(e => {});
 
 fetch("geo_22_訪問看護.geojson")
 .then(res => res.json())
@@ -1329,8 +1172,6 @@ fetch("geo_22_訪問看護.geojson")
             const markerRadius = (shape === 'star') ? 12 : ((shape === 'circle') ? 5 : 8);
 
             return new L.CustomMarker(latlng, {
-                // 元画面では従来どおり同じRendererを使用。
-                // 印刷時だけcloneLayerForPrint()内で専用Rendererへ複製する。
                 renderer: myRenderer,
                 shape: shape,
                 radius: markerRadius,
@@ -1356,16 +1197,8 @@ fetch("geo_22_訪問看護.geojson")
             });
         }
     });
-    // データ取得完了後、チェックボックスがONなら元地図へ追加。
-    const busOrFacilityCb = document.querySelector(`.${label === "バス停留所" ? "bus-toggle" : "facility-toggle"}[value="${label}"]`);
-    if (busOrFacilityCb && busOrFacilityCb.checked) {
-        facilityLayers["訪問看護"].addTo(map);
-        setTimeout(() => {
-            if (myRenderer && myRenderer._requestRedraw) myRenderer._requestRedraw();
-        }, 50);
-    }
 })
-.catch(e => { console.error("GeoJSON読込エラー: 訪問看護", e); });
+.catch(e => {});
 
 fetch("geo_22_訪問リハビリテーション.geojson")
 .then(res => res.json())
@@ -1377,8 +1210,6 @@ fetch("geo_22_訪問リハビリテーション.geojson")
             const markerRadius = (shape === 'star') ? 12 : ((shape === 'circle') ? 5 : 8);
 
             return new L.CustomMarker(latlng, {
-                // 元画面では従来どおり同じRendererを使用。
-                // 印刷時だけcloneLayerForPrint()内で専用Rendererへ複製する。
                 renderer: myRenderer,
                 shape: shape,
                 radius: markerRadius,
@@ -1404,16 +1235,8 @@ fetch("geo_22_訪問リハビリテーション.geojson")
             });
         }
     });
-    // データ取得完了後、チェックボックスがONなら元地図へ追加。
-    const busOrFacilityCb = document.querySelector(`.${label === "バス停留所" ? "bus-toggle" : "facility-toggle"}[value="${label}"]`);
-    if (busOrFacilityCb && busOrFacilityCb.checked) {
-        facilityLayers["訪問リハビリテーション"].addTo(map);
-        setTimeout(() => {
-            if (myRenderer && myRenderer._requestRedraw) myRenderer._requestRedraw();
-        }, 50);
-    }
 })
-.catch(e => { console.error("GeoJSON読込エラー: 訪問リハビリテーション", e); });
+.catch(e => {});
 
 fetch("geo_22_通所介護.geojson")
 .then(res => res.json())
@@ -1425,8 +1248,6 @@ fetch("geo_22_通所介護.geojson")
             const markerRadius = (shape === 'star') ? 12 : ((shape === 'circle') ? 5 : 8);
 
             return new L.CustomMarker(latlng, {
-                // 元画面では従来どおり同じRendererを使用。
-                // 印刷時だけcloneLayerForPrint()内で専用Rendererへ複製する。
                 renderer: myRenderer,
                 shape: shape,
                 radius: markerRadius,
@@ -1452,16 +1273,8 @@ fetch("geo_22_通所介護.geojson")
             });
         }
     });
-    // データ取得完了後、チェックボックスがONなら元地図へ追加。
-    const busOrFacilityCb = document.querySelector(`.${label === "バス停留所" ? "bus-toggle" : "facility-toggle"}[value="${label}"]`);
-    if (busOrFacilityCb && busOrFacilityCb.checked) {
-        facilityLayers["通所介護"].addTo(map);
-        setTimeout(() => {
-            if (myRenderer && myRenderer._requestRedraw) myRenderer._requestRedraw();
-        }, 50);
-    }
 })
-.catch(e => { console.error("GeoJSON読込エラー: 通所介護", e); });
+.catch(e => {});
 
 fetch("geo_22_通所介護（療養通所介護）.geojson")
 .then(res => res.json())
@@ -1473,8 +1286,6 @@ fetch("geo_22_通所介護（療養通所介護）.geojson")
             const markerRadius = (shape === 'star') ? 12 : ((shape === 'circle') ? 5 : 8);
 
             return new L.CustomMarker(latlng, {
-                // 元画面では従来どおり同じRendererを使用。
-                // 印刷時だけcloneLayerForPrint()内で専用Rendererへ複製する。
                 renderer: myRenderer,
                 shape: shape,
                 radius: markerRadius,
@@ -1500,16 +1311,8 @@ fetch("geo_22_通所介護（療養通所介護）.geojson")
             });
         }
     });
-    // データ取得完了後、チェックボックスがONなら元地図へ追加。
-    const busOrFacilityCb = document.querySelector(`.${label === "バス停留所" ? "bus-toggle" : "facility-toggle"}[value="${label}"]`);
-    if (busOrFacilityCb && busOrFacilityCb.checked) {
-        facilityLayers["通所介護（療養通所介護）"].addTo(map);
-        setTimeout(() => {
-            if (myRenderer && myRenderer._requestRedraw) myRenderer._requestRedraw();
-        }, 50);
-    }
 })
-.catch(e => { console.error("GeoJSON読込エラー: 通所介護（療養通所介護）", e); });
+.catch(e => {});
 
 fetch("geo_22_通所リハビリテーション.geojson")
 .then(res => res.json())
@@ -1521,8 +1324,6 @@ fetch("geo_22_通所リハビリテーション.geojson")
             const markerRadius = (shape === 'star') ? 12 : ((shape === 'circle') ? 5 : 8);
 
             return new L.CustomMarker(latlng, {
-                // 元画面では従来どおり同じRendererを使用。
-                // 印刷時だけcloneLayerForPrint()内で専用Rendererへ複製する。
                 renderer: myRenderer,
                 shape: shape,
                 radius: markerRadius,
@@ -1548,16 +1349,8 @@ fetch("geo_22_通所リハビリテーション.geojson")
             });
         }
     });
-    // データ取得完了後、チェックボックスがONなら元地図へ追加。
-    const busOrFacilityCb = document.querySelector(`.${label === "バス停留所" ? "bus-toggle" : "facility-toggle"}[value="${label}"]`);
-    if (busOrFacilityCb && busOrFacilityCb.checked) {
-        facilityLayers["通所リハビリテーション"].addTo(map);
-        setTimeout(() => {
-            if (myRenderer && myRenderer._requestRedraw) myRenderer._requestRedraw();
-        }, 50);
-    }
 })
-.catch(e => { console.error("GeoJSON読込エラー: 通所リハビリテーション", e); });
+.catch(e => {});
 
 fetch("geo_22_福祉用具貸与.geojson")
 .then(res => res.json())
@@ -1569,8 +1362,6 @@ fetch("geo_22_福祉用具貸与.geojson")
             const markerRadius = (shape === 'star') ? 12 : ((shape === 'circle') ? 5 : 8);
 
             return new L.CustomMarker(latlng, {
-                // 元画面では従来どおり同じRendererを使用。
-                // 印刷時だけcloneLayerForPrint()内で専用Rendererへ複製する。
                 renderer: myRenderer,
                 shape: shape,
                 radius: markerRadius,
@@ -1596,16 +1387,8 @@ fetch("geo_22_福祉用具貸与.geojson")
             });
         }
     });
-    // データ取得完了後、チェックボックスがONなら元地図へ追加。
-    const busOrFacilityCb = document.querySelector(`.${label === "バス停留所" ? "bus-toggle" : "facility-toggle"}[value="${label}"]`);
-    if (busOrFacilityCb && busOrFacilityCb.checked) {
-        facilityLayers["福祉用具貸与"].addTo(map);
-        setTimeout(() => {
-            if (myRenderer && myRenderer._requestRedraw) myRenderer._requestRedraw();
-        }, 50);
-    }
 })
-.catch(e => { console.error("GeoJSON読込エラー: 福祉用具貸与", e); });
+.catch(e => {});
 
 fetch("geo_22_短期入所生活介護.geojson")
 .then(res => res.json())
@@ -1617,8 +1400,6 @@ fetch("geo_22_短期入所生活介護.geojson")
             const markerRadius = (shape === 'star') ? 12 : ((shape === 'circle') ? 5 : 8);
 
             return new L.CustomMarker(latlng, {
-                // 元画面では従来どおり同じRendererを使用。
-                // 印刷時だけcloneLayerForPrint()内で専用Rendererへ複製する。
                 renderer: myRenderer,
                 shape: shape,
                 radius: markerRadius,
@@ -1644,16 +1425,8 @@ fetch("geo_22_短期入所生活介護.geojson")
             });
         }
     });
-    // データ取得完了後、チェックボックスがONなら元地図へ追加。
-    const busOrFacilityCb = document.querySelector(`.${label === "バス停留所" ? "bus-toggle" : "facility-toggle"}[value="${label}"]`);
-    if (busOrFacilityCb && busOrFacilityCb.checked) {
-        facilityLayers["短期入所生活介護"].addTo(map);
-        setTimeout(() => {
-            if (myRenderer && myRenderer._requestRedraw) myRenderer._requestRedraw();
-        }, 50);
-    }
 })
-.catch(e => { console.error("GeoJSON読込エラー: 短期入所生活介護", e); });
+.catch(e => {});
 
 fetch("geo_22_短期入所療養介護（介護老人保健施設）.geojson")
 .then(res => res.json())
@@ -1665,8 +1438,6 @@ fetch("geo_22_短期入所療養介護（介護老人保健施設）.geojson")
             const markerRadius = (shape === 'star') ? 12 : ((shape === 'circle') ? 5 : 8);
 
             return new L.CustomMarker(latlng, {
-                // 元画面では従来どおり同じRendererを使用。
-                // 印刷時だけcloneLayerForPrint()内で専用Rendererへ複製する。
                 renderer: myRenderer,
                 shape: shape,
                 radius: markerRadius,
@@ -1692,16 +1463,8 @@ fetch("geo_22_短期入所療養介護（介護老人保健施設）.geojson")
             });
         }
     });
-    // データ取得完了後、チェックボックスがONなら元地図へ追加。
-    const busOrFacilityCb = document.querySelector(`.${label === "バス停留所" ? "bus-toggle" : "facility-toggle"}[value="${label}"]`);
-    if (busOrFacilityCb && busOrFacilityCb.checked) {
-        facilityLayers["短期入所療養介護（介護老人保健施設）"].addTo(map);
-        setTimeout(() => {
-            if (myRenderer && myRenderer._requestRedraw) myRenderer._requestRedraw();
-        }, 50);
-    }
 })
-.catch(e => { console.error("GeoJSON読込エラー: 短期入所療養介護（介護老人保健施設）", e); });
+.catch(e => {});
 
 fetch("geo_22_短期入所療養介護（療養病床を有する病院等）.geojson")
 .then(res => res.json())
@@ -1713,8 +1476,6 @@ fetch("geo_22_短期入所療養介護（療養病床を有する病院等）.ge
             const markerRadius = (shape === 'star') ? 12 : ((shape === 'circle') ? 5 : 8);
 
             return new L.CustomMarker(latlng, {
-                // 元画面では従来どおり同じRendererを使用。
-                // 印刷時だけcloneLayerForPrint()内で専用Rendererへ複製する。
                 renderer: myRenderer,
                 shape: shape,
                 radius: markerRadius,
@@ -1740,16 +1501,8 @@ fetch("geo_22_短期入所療養介護（療養病床を有する病院等）.ge
             });
         }
     });
-    // データ取得完了後、チェックボックスがONなら元地図へ追加。
-    const busOrFacilityCb = document.querySelector(`.${label === "バス停留所" ? "bus-toggle" : "facility-toggle"}[value="${label}"]`);
-    if (busOrFacilityCb && busOrFacilityCb.checked) {
-        facilityLayers["短期入所療養介護（療養病床を有する病院等）"].addTo(map);
-        setTimeout(() => {
-            if (myRenderer && myRenderer._requestRedraw) myRenderer._requestRedraw();
-        }, 50);
-    }
 })
-.catch(e => { console.error("GeoJSON読込エラー: 短期入所療養介護（療養病床を有する病院等）", e); });
+.catch(e => {});
 
 fetch("geo_22_短期入所療養介護（介護医療院）.geojson")
 .then(res => res.json())
@@ -1761,8 +1514,6 @@ fetch("geo_22_短期入所療養介護（介護医療院）.geojson")
             const markerRadius = (shape === 'star') ? 12 : ((shape === 'circle') ? 5 : 8);
 
             return new L.CustomMarker(latlng, {
-                // 元画面では従来どおり同じRendererを使用。
-                // 印刷時だけcloneLayerForPrint()内で専用Rendererへ複製する。
                 renderer: myRenderer,
                 shape: shape,
                 radius: markerRadius,
@@ -1788,16 +1539,8 @@ fetch("geo_22_短期入所療養介護（介護医療院）.geojson")
             });
         }
     });
-    // データ取得完了後、チェックボックスがONなら元地図へ追加。
-    const busOrFacilityCb = document.querySelector(`.${label === "バス停留所" ? "bus-toggle" : "facility-toggle"}[value="${label}"]`);
-    if (busOrFacilityCb && busOrFacilityCb.checked) {
-        facilityLayers["短期入所療養介護（介護医療院）"].addTo(map);
-        setTimeout(() => {
-            if (myRenderer && myRenderer._requestRedraw) myRenderer._requestRedraw();
-        }, 50);
-    }
 })
-.catch(e => { console.error("GeoJSON読込エラー: 短期入所療養介護（介護医療院）", e); });
+.catch(e => {});
 
 fetch("geo_22_認知症対応型共同生活介護.geojson")
 .then(res => res.json())
@@ -1809,8 +1552,6 @@ fetch("geo_22_認知症対応型共同生活介護.geojson")
             const markerRadius = (shape === 'star') ? 12 : ((shape === 'circle') ? 5 : 8);
 
             return new L.CustomMarker(latlng, {
-                // 元画面では従来どおり同じRendererを使用。
-                // 印刷時だけcloneLayerForPrint()内で専用Rendererへ複製する。
                 renderer: myRenderer,
                 shape: shape,
                 radius: markerRadius,
@@ -1836,16 +1577,8 @@ fetch("geo_22_認知症対応型共同生活介護.geojson")
             });
         }
     });
-    // データ取得完了後、チェックボックスがONなら元地図へ追加。
-    const busOrFacilityCb = document.querySelector(`.${label === "バス停留所" ? "bus-toggle" : "facility-toggle"}[value="${label}"]`);
-    if (busOrFacilityCb && busOrFacilityCb.checked) {
-        facilityLayers["認知症対応型共同生活介護"].addTo(map);
-        setTimeout(() => {
-            if (myRenderer && myRenderer._requestRedraw) myRenderer._requestRedraw();
-        }, 50);
-    }
 })
-.catch(e => { console.error("GeoJSON読込エラー: 認知症対応型共同生活介護", e); });
+.catch(e => {});
 
 fetch("geo_22_特定施設入居者生活介護（有料老人ホーム）.geojson")
 .then(res => res.json())
@@ -1857,8 +1590,6 @@ fetch("geo_22_特定施設入居者生活介護（有料老人ホーム）.geojs
             const markerRadius = (shape === 'star') ? 12 : ((shape === 'circle') ? 5 : 8);
 
             return new L.CustomMarker(latlng, {
-                // 元画面では従来どおり同じRendererを使用。
-                // 印刷時だけcloneLayerForPrint()内で専用Rendererへ複製する。
                 renderer: myRenderer,
                 shape: shape,
                 radius: markerRadius,
@@ -1884,16 +1615,8 @@ fetch("geo_22_特定施設入居者生活介護（有料老人ホーム）.geojs
             });
         }
     });
-    // データ取得完了後、チェックボックスがONなら元地図へ追加。
-    const busOrFacilityCb = document.querySelector(`.${label === "バス停留所" ? "bus-toggle" : "facility-toggle"}[value="${label}"]`);
-    if (busOrFacilityCb && busOrFacilityCb.checked) {
-        facilityLayers["特定施設入居者生活介護（有料老人ホーム）"].addTo(map);
-        setTimeout(() => {
-            if (myRenderer && myRenderer._requestRedraw) myRenderer._requestRedraw();
-        }, 50);
-    }
 })
-.catch(e => { console.error("GeoJSON読込エラー: 特定施設入居者生活介護（有料老人ホーム）", e); });
+.catch(e => {});
 
 fetch("geo_22_特定施設入居者生活介護（軽費老人ホーム）.geojson")
 .then(res => res.json())
@@ -1905,8 +1628,6 @@ fetch("geo_22_特定施設入居者生活介護（軽費老人ホーム）.geojs
             const markerRadius = (shape === 'star') ? 12 : ((shape === 'circle') ? 5 : 8);
 
             return new L.CustomMarker(latlng, {
-                // 元画面では従来どおり同じRendererを使用。
-                // 印刷時だけcloneLayerForPrint()内で専用Rendererへ複製する。
                 renderer: myRenderer,
                 shape: shape,
                 radius: markerRadius,
@@ -1932,16 +1653,8 @@ fetch("geo_22_特定施設入居者生活介護（軽費老人ホーム）.geojs
             });
         }
     });
-    // データ取得完了後、チェックボックスがONなら元地図へ追加。
-    const busOrFacilityCb = document.querySelector(`.${label === "バス停留所" ? "bus-toggle" : "facility-toggle"}[value="${label}"]`);
-    if (busOrFacilityCb && busOrFacilityCb.checked) {
-        facilityLayers["特定施設入居者生活介護（軽費老人ホーム）"].addTo(map);
-        setTimeout(() => {
-            if (myRenderer && myRenderer._requestRedraw) myRenderer._requestRedraw();
-        }, 50);
-    }
 })
-.catch(e => { console.error("GeoJSON読込エラー: 特定施設入居者生活介護（軽費老人ホーム）", e); });
+.catch(e => {});
 
 fetch("geo_22_特定施設入居者生活介護（サービス付き高齢者向け住宅）.geojson")
 .then(res => res.json())
@@ -1953,8 +1666,6 @@ fetch("geo_22_特定施設入居者生活介護（サービス付き高齢者向
             const markerRadius = (shape === 'star') ? 12 : ((shape === 'circle') ? 5 : 8);
 
             return new L.CustomMarker(latlng, {
-                // 元画面では従来どおり同じRendererを使用。
-                // 印刷時だけcloneLayerForPrint()内で専用Rendererへ複製する。
                 renderer: myRenderer,
                 shape: shape,
                 radius: markerRadius,
@@ -1980,16 +1691,8 @@ fetch("geo_22_特定施設入居者生活介護（サービス付き高齢者向
             });
         }
     });
-    // データ取得完了後、チェックボックスがONなら元地図へ追加。
-    const busOrFacilityCb = document.querySelector(`.${label === "バス停留所" ? "bus-toggle" : "facility-toggle"}[value="${label}"]`);
-    if (busOrFacilityCb && busOrFacilityCb.checked) {
-        facilityLayers["特定施設入居者生活介護（サービス付き高齢者向け住宅）"].addTo(map);
-        setTimeout(() => {
-            if (myRenderer && myRenderer._requestRedraw) myRenderer._requestRedraw();
-        }, 50);
-    }
 })
-.catch(e => { console.error("GeoJSON読込エラー: 特定施設入居者生活介護（サービス付き高齢者向け住宅）", e); });
+.catch(e => {});
 
 fetch("geo_22_特定施設入居者生活介護（有料老人ホーム・外部サービス利用型）.geojson")
 .then(res => res.json())
@@ -2001,8 +1704,6 @@ fetch("geo_22_特定施設入居者生活介護（有料老人ホーム・外部
             const markerRadius = (shape === 'star') ? 12 : ((shape === 'circle') ? 5 : 8);
 
             return new L.CustomMarker(latlng, {
-                // 元画面では従来どおり同じRendererを使用。
-                // 印刷時だけcloneLayerForPrint()内で専用Rendererへ複製する。
                 renderer: myRenderer,
                 shape: shape,
                 radius: markerRadius,
@@ -2028,16 +1729,8 @@ fetch("geo_22_特定施設入居者生活介護（有料老人ホーム・外部
             });
         }
     });
-    // データ取得完了後、チェックボックスがONなら元地図へ追加。
-    const busOrFacilityCb = document.querySelector(`.${label === "バス停留所" ? "bus-toggle" : "facility-toggle"}[value="${label}"]`);
-    if (busOrFacilityCb && busOrFacilityCb.checked) {
-        facilityLayers["特定施設入居者生活介護（有料老人ホーム・外部サービス利用型）"].addTo(map);
-        setTimeout(() => {
-            if (myRenderer && myRenderer._requestRedraw) myRenderer._requestRedraw();
-        }, 50);
-    }
 })
-.catch(e => { console.error("GeoJSON読込エラー: 特定施設入居者生活介護（有料老人ホーム・外部サービス利用型）", e); });
+.catch(e => {});
 
 fetch("geo_22_特定施設入居者生活介護（軽費老人ホーム・外部サービス利用型）.geojson")
 .then(res => res.json())
@@ -2049,8 +1742,6 @@ fetch("geo_22_特定施設入居者生活介護（軽費老人ホーム・外部
             const markerRadius = (shape === 'star') ? 12 : ((shape === 'circle') ? 5 : 8);
 
             return new L.CustomMarker(latlng, {
-                // 元画面では従来どおり同じRendererを使用。
-                // 印刷時だけcloneLayerForPrint()内で専用Rendererへ複製する。
                 renderer: myRenderer,
                 shape: shape,
                 radius: markerRadius,
@@ -2076,16 +1767,8 @@ fetch("geo_22_特定施設入居者生活介護（軽費老人ホーム・外部
             });
         }
     });
-    // データ取得完了後、チェックボックスがONなら元地図へ追加。
-    const busOrFacilityCb = document.querySelector(`.${label === "バス停留所" ? "bus-toggle" : "facility-toggle"}[value="${label}"]`);
-    if (busOrFacilityCb && busOrFacilityCb.checked) {
-        facilityLayers["特定施設入居者生活介護（軽費老人ホーム・外部サービス利用型）"].addTo(map);
-        setTimeout(() => {
-            if (myRenderer && myRenderer._requestRedraw) myRenderer._requestRedraw();
-        }, 50);
-    }
 })
-.catch(e => { console.error("GeoJSON読込エラー: 特定施設入居者生活介護（軽費老人ホーム・外部サービス利用型）", e); });
+.catch(e => {});
 
 fetch("geo_22_特定施設入居者生活介護（サービス付き高齢者向け住宅・外部サービス利用型）.geojson")
 .then(res => res.json())
@@ -2097,8 +1780,6 @@ fetch("geo_22_特定施設入居者生活介護（サービス付き高齢者向
             const markerRadius = (shape === 'star') ? 12 : ((shape === 'circle') ? 5 : 8);
 
             return new L.CustomMarker(latlng, {
-                // 元画面では従来どおり同じRendererを使用。
-                // 印刷時だけcloneLayerForPrint()内で専用Rendererへ複製する。
                 renderer: myRenderer,
                 shape: shape,
                 radius: markerRadius,
@@ -2124,16 +1805,8 @@ fetch("geo_22_特定施設入居者生活介護（サービス付き高齢者向
             });
         }
     });
-    // データ取得完了後、チェックボックスがONなら元地図へ追加。
-    const busOrFacilityCb = document.querySelector(`.${label === "バス停留所" ? "bus-toggle" : "facility-toggle"}[value="${label}"]`);
-    if (busOrFacilityCb && busOrFacilityCb.checked) {
-        facilityLayers["特定施設入居者生活介護（サービス付き高齢者向け住宅・外部サービス利用型）"].addTo(map);
-        setTimeout(() => {
-            if (myRenderer && myRenderer._requestRedraw) myRenderer._requestRedraw();
-        }, 50);
-    }
 })
-.catch(e => { console.error("GeoJSON読込エラー: 特定施設入居者生活介護（サービス付き高齢者向け住宅・外部サービス利用型）", e); });
+.catch(e => {});
 
 fetch("geo_22_地域密着型特定施設入居者生活介護（有料老人ホーム）.geojson")
 .then(res => res.json())
@@ -2145,8 +1818,6 @@ fetch("geo_22_地域密着型特定施設入居者生活介護（有料老人ホ
             const markerRadius = (shape === 'star') ? 12 : ((shape === 'circle') ? 5 : 8);
 
             return new L.CustomMarker(latlng, {
-                // 元画面では従来どおり同じRendererを使用。
-                // 印刷時だけcloneLayerForPrint()内で専用Rendererへ複製する。
                 renderer: myRenderer,
                 shape: shape,
                 radius: markerRadius,
@@ -2172,16 +1843,8 @@ fetch("geo_22_地域密着型特定施設入居者生活介護（有料老人ホ
             });
         }
     });
-    // データ取得完了後、チェックボックスがONなら元地図へ追加。
-    const busOrFacilityCb = document.querySelector(`.${label === "バス停留所" ? "bus-toggle" : "facility-toggle"}[value="${label}"]`);
-    if (busOrFacilityCb && busOrFacilityCb.checked) {
-        facilityLayers["地域密着型特定施設入居者生活介護（有料老人ホーム）"].addTo(map);
-        setTimeout(() => {
-            if (myRenderer && myRenderer._requestRedraw) myRenderer._requestRedraw();
-        }, 50);
-    }
 })
-.catch(e => { console.error("GeoJSON読込エラー: 地域密着型特定施設入居者生活介護（有料老人ホーム）", e); });
+.catch(e => {});
 
 fetch("geo_22_地域密着型特定施設入居者生活介護（軽費老人ホーム）.geojson")
 .then(res => res.json())
@@ -2193,8 +1856,6 @@ fetch("geo_22_地域密着型特定施設入居者生活介護（軽費老人ホ
             const markerRadius = (shape === 'star') ? 12 : ((shape === 'circle') ? 5 : 8);
 
             return new L.CustomMarker(latlng, {
-                // 元画面では従来どおり同じRendererを使用。
-                // 印刷時だけcloneLayerForPrint()内で専用Rendererへ複製する。
                 renderer: myRenderer,
                 shape: shape,
                 radius: markerRadius,
@@ -2220,16 +1881,8 @@ fetch("geo_22_地域密着型特定施設入居者生活介護（軽費老人ホ
             });
         }
     });
-    // データ取得完了後、チェックボックスがONなら元地図へ追加。
-    const busOrFacilityCb = document.querySelector(`.${label === "バス停留所" ? "bus-toggle" : "facility-toggle"}[value="${label}"]`);
-    if (busOrFacilityCb && busOrFacilityCb.checked) {
-        facilityLayers["地域密着型特定施設入居者生活介護（軽費老人ホーム）"].addTo(map);
-        setTimeout(() => {
-            if (myRenderer && myRenderer._requestRedraw) myRenderer._requestRedraw();
-        }, 50);
-    }
 })
-.catch(e => { console.error("GeoJSON読込エラー: 地域密着型特定施設入居者生活介護（軽費老人ホーム）", e); });
+.catch(e => {});
 
 fetch("geo_22_地域密着型特定施設入居者生活介護（サービス付き高齢者向け住宅）.geojson")
 .then(res => res.json())
@@ -2241,8 +1894,6 @@ fetch("geo_22_地域密着型特定施設入居者生活介護（サービス付
             const markerRadius = (shape === 'star') ? 12 : ((shape === 'circle') ? 5 : 8);
 
             return new L.CustomMarker(latlng, {
-                // 元画面では従来どおり同じRendererを使用。
-                // 印刷時だけcloneLayerForPrint()内で専用Rendererへ複製する。
                 renderer: myRenderer,
                 shape: shape,
                 radius: markerRadius,
@@ -2268,16 +1919,8 @@ fetch("geo_22_地域密着型特定施設入居者生活介護（サービス付
             });
         }
     });
-    // データ取得完了後、チェックボックスがONなら元地図へ追加。
-    const busOrFacilityCb = document.querySelector(`.${label === "バス停留所" ? "bus-toggle" : "facility-toggle"}[value="${label}"]`);
-    if (busOrFacilityCb && busOrFacilityCb.checked) {
-        facilityLayers["地域密着型特定施設入居者生活介護（サービス付き高齢者向け住宅）"].addTo(map);
-        setTimeout(() => {
-            if (myRenderer && myRenderer._requestRedraw) myRenderer._requestRedraw();
-        }, 50);
-    }
 })
-.catch(e => { console.error("GeoJSON読込エラー: 地域密着型特定施設入居者生活介護（サービス付き高齢者向け住宅）", e); });
+.catch(e => {});
 
 fetch("geo_22_特定福祉用具販売.geojson")
 .then(res => res.json())
@@ -2289,8 +1932,6 @@ fetch("geo_22_特定福祉用具販売.geojson")
             const markerRadius = (shape === 'star') ? 12 : ((shape === 'circle') ? 5 : 8);
 
             return new L.CustomMarker(latlng, {
-                // 元画面では従来どおり同じRendererを使用。
-                // 印刷時だけcloneLayerForPrint()内で専用Rendererへ複製する。
                 renderer: myRenderer,
                 shape: shape,
                 radius: markerRadius,
@@ -2316,16 +1957,8 @@ fetch("geo_22_特定福祉用具販売.geojson")
             });
         }
     });
-    // データ取得完了後、チェックボックスがONなら元地図へ追加。
-    const busOrFacilityCb = document.querySelector(`.${label === "バス停留所" ? "bus-toggle" : "facility-toggle"}[value="${label}"]`);
-    if (busOrFacilityCb && busOrFacilityCb.checked) {
-        facilityLayers["特定福祉用具販売"].addTo(map);
-        setTimeout(() => {
-            if (myRenderer && myRenderer._requestRedraw) myRenderer._requestRedraw();
-        }, 50);
-    }
 })
-.catch(e => { console.error("GeoJSON読込エラー: 特定福祉用具販売", e); });
+.catch(e => {});
 
 fetch("geo_22_居宅介護支援.geojson")
 .then(res => res.json())
@@ -2337,8 +1970,6 @@ fetch("geo_22_居宅介護支援.geojson")
             const markerRadius = (shape === 'star') ? 12 : ((shape === 'circle') ? 5 : 8);
 
             return new L.CustomMarker(latlng, {
-                // 元画面では従来どおり同じRendererを使用。
-                // 印刷時だけcloneLayerForPrint()内で専用Rendererへ複製する。
                 renderer: myRenderer,
                 shape: shape,
                 radius: markerRadius,
@@ -2364,16 +1995,8 @@ fetch("geo_22_居宅介護支援.geojson")
             });
         }
     });
-    // データ取得完了後、チェックボックスがONなら元地図へ追加。
-    const busOrFacilityCb = document.querySelector(`.${label === "バス停留所" ? "bus-toggle" : "facility-toggle"}[value="${label}"]`);
-    if (busOrFacilityCb && busOrFacilityCb.checked) {
-        facilityLayers["居宅介護支援"].addTo(map);
-        setTimeout(() => {
-            if (myRenderer && myRenderer._requestRedraw) myRenderer._requestRedraw();
-        }, 50);
-    }
 })
-.catch(e => { console.error("GeoJSON読込エラー: 居宅介護支援", e); });
+.catch(e => {});
 
 fetch("geo_22_介護老人福祉施設.geojson")
 .then(res => res.json())
@@ -2385,8 +2008,6 @@ fetch("geo_22_介護老人福祉施設.geojson")
             const markerRadius = (shape === 'star') ? 12 : ((shape === 'circle') ? 5 : 8);
 
             return new L.CustomMarker(latlng, {
-                // 元画面では従来どおり同じRendererを使用。
-                // 印刷時だけcloneLayerForPrint()内で専用Rendererへ複製する。
                 renderer: myRenderer,
                 shape: shape,
                 radius: markerRadius,
@@ -2412,16 +2033,8 @@ fetch("geo_22_介護老人福祉施設.geojson")
             });
         }
     });
-    // データ取得完了後、チェックボックスがONなら元地図へ追加。
-    const busOrFacilityCb = document.querySelector(`.${label === "バス停留所" ? "bus-toggle" : "facility-toggle"}[value="${label}"]`);
-    if (busOrFacilityCb && busOrFacilityCb.checked) {
-        facilityLayers["介護老人福祉施設"].addTo(map);
-        setTimeout(() => {
-            if (myRenderer && myRenderer._requestRedraw) myRenderer._requestRedraw();
-        }, 50);
-    }
 })
-.catch(e => { console.error("GeoJSON読込エラー: 介護老人福祉施設", e); });
+.catch(e => {});
 
 fetch("geo_22_介護老人保健施設.geojson")
 .then(res => res.json())
@@ -2433,8 +2046,6 @@ fetch("geo_22_介護老人保健施設.geojson")
             const markerRadius = (shape === 'star') ? 12 : ((shape === 'circle') ? 5 : 8);
 
             return new L.CustomMarker(latlng, {
-                // 元画面では従来どおり同じRendererを使用。
-                // 印刷時だけcloneLayerForPrint()内で専用Rendererへ複製する。
                 renderer: myRenderer,
                 shape: shape,
                 radius: markerRadius,
@@ -2460,16 +2071,8 @@ fetch("geo_22_介護老人保健施設.geojson")
             });
         }
     });
-    // データ取得完了後、チェックボックスがONなら元地図へ追加。
-    const busOrFacilityCb = document.querySelector(`.${label === "バス停留所" ? "bus-toggle" : "facility-toggle"}[value="${label}"]`);
-    if (busOrFacilityCb && busOrFacilityCb.checked) {
-        facilityLayers["介護老人保健施設"].addTo(map);
-        setTimeout(() => {
-            if (myRenderer && myRenderer._requestRedraw) myRenderer._requestRedraw();
-        }, 50);
-    }
 })
-.catch(e => { console.error("GeoJSON読込エラー: 介護老人保健施設", e); });
+.catch(e => {});
 
 fetch("geo_22_介護療養型医療施設.geojson")
 .then(res => res.json())
@@ -2481,8 +2084,6 @@ fetch("geo_22_介護療養型医療施設.geojson")
             const markerRadius = (shape === 'star') ? 12 : ((shape === 'circle') ? 5 : 8);
 
             return new L.CustomMarker(latlng, {
-                // 元画面では従来どおり同じRendererを使用。
-                // 印刷時だけcloneLayerForPrint()内で専用Rendererへ複製する。
                 renderer: myRenderer,
                 shape: shape,
                 radius: markerRadius,
@@ -2508,16 +2109,8 @@ fetch("geo_22_介護療養型医療施設.geojson")
             });
         }
     });
-    // データ取得完了後、チェックボックスがONなら元地図へ追加。
-    const busOrFacilityCb = document.querySelector(`.${label === "バス停留所" ? "bus-toggle" : "facility-toggle"}[value="${label}"]`);
-    if (busOrFacilityCb && busOrFacilityCb.checked) {
-        facilityLayers["介護療養型医療施設"].addTo(map);
-        setTimeout(() => {
-            if (myRenderer && myRenderer._requestRedraw) myRenderer._requestRedraw();
-        }, 50);
-    }
 })
-.catch(e => { console.error("GeoJSON読込エラー: 介護療養型医療施設", e); });
+.catch(e => {});
 
 fetch("geo_22_地域密着型介護老人福祉施設入所者生活介護.geojson")
 .then(res => res.json())
@@ -2529,8 +2122,6 @@ fetch("geo_22_地域密着型介護老人福祉施設入所者生活介護.geojs
             const markerRadius = (shape === 'star') ? 12 : ((shape === 'circle') ? 5 : 8);
 
             return new L.CustomMarker(latlng, {
-                // 元画面では従来どおり同じRendererを使用。
-                // 印刷時だけcloneLayerForPrint()内で専用Rendererへ複製する。
                 renderer: myRenderer,
                 shape: shape,
                 radius: markerRadius,
@@ -2556,16 +2147,8 @@ fetch("geo_22_地域密着型介護老人福祉施設入所者生活介護.geojs
             });
         }
     });
-    // データ取得完了後、チェックボックスがONなら元地図へ追加。
-    const busOrFacilityCb = document.querySelector(`.${label === "バス停留所" ? "bus-toggle" : "facility-toggle"}[value="${label}"]`);
-    if (busOrFacilityCb && busOrFacilityCb.checked) {
-        facilityLayers["地域密着型介護老人福祉施設入所者生活介護"].addTo(map);
-        setTimeout(() => {
-            if (myRenderer && myRenderer._requestRedraw) myRenderer._requestRedraw();
-        }, 50);
-    }
 })
-.catch(e => { console.error("GeoJSON読込エラー: 地域密着型介護老人福祉施設入所者生活介護", e); });
+.catch(e => {});
 
 fetch("geo_22_介護医療院.geojson")
 .then(res => res.json())
@@ -2577,8 +2160,6 @@ fetch("geo_22_介護医療院.geojson")
             const markerRadius = (shape === 'star') ? 12 : ((shape === 'circle') ? 5 : 8);
 
             return new L.CustomMarker(latlng, {
-                // 元画面では従来どおり同じRendererを使用。
-                // 印刷時だけcloneLayerForPrint()内で専用Rendererへ複製する。
                 renderer: myRenderer,
                 shape: shape,
                 radius: markerRadius,
@@ -2604,16 +2185,8 @@ fetch("geo_22_介護医療院.geojson")
             });
         }
     });
-    // データ取得完了後、チェックボックスがONなら元地図へ追加。
-    const busOrFacilityCb = document.querySelector(`.${label === "バス停留所" ? "bus-toggle" : "facility-toggle"}[value="${label}"]`);
-    if (busOrFacilityCb && busOrFacilityCb.checked) {
-        facilityLayers["介護医療院"].addTo(map);
-        setTimeout(() => {
-            if (myRenderer && myRenderer._requestRedraw) myRenderer._requestRedraw();
-        }, 50);
-    }
 })
-.catch(e => { console.error("GeoJSON読込エラー: 介護医療院", e); });
+.catch(e => {});
 
 fetch("geo_22_夜間対応型訪問介護.geojson")
 .then(res => res.json())
@@ -2625,8 +2198,6 @@ fetch("geo_22_夜間対応型訪問介護.geojson")
             const markerRadius = (shape === 'star') ? 12 : ((shape === 'circle') ? 5 : 8);
 
             return new L.CustomMarker(latlng, {
-                // 元画面では従来どおり同じRendererを使用。
-                // 印刷時だけcloneLayerForPrint()内で専用Rendererへ複製する。
                 renderer: myRenderer,
                 shape: shape,
                 radius: markerRadius,
@@ -2652,16 +2223,8 @@ fetch("geo_22_夜間対応型訪問介護.geojson")
             });
         }
     });
-    // データ取得完了後、チェックボックスがONなら元地図へ追加。
-    const busOrFacilityCb = document.querySelector(`.${label === "バス停留所" ? "bus-toggle" : "facility-toggle"}[value="${label}"]`);
-    if (busOrFacilityCb && busOrFacilityCb.checked) {
-        facilityLayers["夜間対応型訪問介護"].addTo(map);
-        setTimeout(() => {
-            if (myRenderer && myRenderer._requestRedraw) myRenderer._requestRedraw();
-        }, 50);
-    }
 })
-.catch(e => { console.error("GeoJSON読込エラー: 夜間対応型訪問介護", e); });
+.catch(e => {});
 
 fetch("geo_22_認知症対応型通所介護.geojson")
 .then(res => res.json())
@@ -2673,8 +2236,6 @@ fetch("geo_22_認知症対応型通所介護.geojson")
             const markerRadius = (shape === 'star') ? 12 : ((shape === 'circle') ? 5 : 8);
 
             return new L.CustomMarker(latlng, {
-                // 元画面では従来どおり同じRendererを使用。
-                // 印刷時だけcloneLayerForPrint()内で専用Rendererへ複製する。
                 renderer: myRenderer,
                 shape: shape,
                 radius: markerRadius,
@@ -2700,16 +2261,8 @@ fetch("geo_22_認知症対応型通所介護.geojson")
             });
         }
     });
-    // データ取得完了後、チェックボックスがONなら元地図へ追加。
-    const busOrFacilityCb = document.querySelector(`.${label === "バス停留所" ? "bus-toggle" : "facility-toggle"}[value="${label}"]`);
-    if (busOrFacilityCb && busOrFacilityCb.checked) {
-        facilityLayers["認知症対応型通所介護"].addTo(map);
-        setTimeout(() => {
-            if (myRenderer && myRenderer._requestRedraw) myRenderer._requestRedraw();
-        }, 50);
-    }
 })
-.catch(e => { console.error("GeoJSON読込エラー: 認知症対応型通所介護", e); });
+.catch(e => {});
 
 fetch("geo_22_小規模多機能型居宅介護.geojson")
 .then(res => res.json())
@@ -2721,8 +2274,6 @@ fetch("geo_22_小規模多機能型居宅介護.geojson")
             const markerRadius = (shape === 'star') ? 12 : ((shape === 'circle') ? 5 : 8);
 
             return new L.CustomMarker(latlng, {
-                // 元画面では従来どおり同じRendererを使用。
-                // 印刷時だけcloneLayerForPrint()内で専用Rendererへ複製する。
                 renderer: myRenderer,
                 shape: shape,
                 radius: markerRadius,
@@ -2748,16 +2299,8 @@ fetch("geo_22_小規模多機能型居宅介護.geojson")
             });
         }
     });
-    // データ取得完了後、チェックボックスがONなら元地図へ追加。
-    const busOrFacilityCb = document.querySelector(`.${label === "バス停留所" ? "bus-toggle" : "facility-toggle"}[value="${label}"]`);
-    if (busOrFacilityCb && busOrFacilityCb.checked) {
-        facilityLayers["小規模多機能型居宅介護"].addTo(map);
-        setTimeout(() => {
-            if (myRenderer && myRenderer._requestRedraw) myRenderer._requestRedraw();
-        }, 50);
-    }
 })
-.catch(e => { console.error("GeoJSON読込エラー: 小規模多機能型居宅介護", e); });
+.catch(e => {});
 
 fetch("geo_22_定期巡回・随時対応型訪問介護看護.geojson")
 .then(res => res.json())
@@ -2769,8 +2312,6 @@ fetch("geo_22_定期巡回・随時対応型訪問介護看護.geojson")
             const markerRadius = (shape === 'star') ? 12 : ((shape === 'circle') ? 5 : 8);
 
             return new L.CustomMarker(latlng, {
-                // 元画面では従来どおり同じRendererを使用。
-                // 印刷時だけcloneLayerForPrint()内で専用Rendererへ複製する。
                 renderer: myRenderer,
                 shape: shape,
                 radius: markerRadius,
@@ -2796,16 +2337,8 @@ fetch("geo_22_定期巡回・随時対応型訪問介護看護.geojson")
             });
         }
     });
-    // データ取得完了後、チェックボックスがONなら元地図へ追加。
-    const busOrFacilityCb = document.querySelector(`.${label === "バス停留所" ? "bus-toggle" : "facility-toggle"}[value="${label}"]`);
-    if (busOrFacilityCb && busOrFacilityCb.checked) {
-        facilityLayers["定期巡回・随時対応型訪問介護看護"].addTo(map);
-        setTimeout(() => {
-            if (myRenderer && myRenderer._requestRedraw) myRenderer._requestRedraw();
-        }, 50);
-    }
 })
-.catch(e => { console.error("GeoJSON読込エラー: 定期巡回・随時対応型訪問介護看護", e); });
+.catch(e => {});
 
 fetch("geo_22_看護小規模多機能型居宅介護.geojson")
 .then(res => res.json())
@@ -2817,8 +2350,6 @@ fetch("geo_22_看護小規模多機能型居宅介護.geojson")
             const markerRadius = (shape === 'star') ? 12 : ((shape === 'circle') ? 5 : 8);
 
             return new L.CustomMarker(latlng, {
-                // 元画面では従来どおり同じRendererを使用。
-                // 印刷時だけcloneLayerForPrint()内で専用Rendererへ複製する。
                 renderer: myRenderer,
                 shape: shape,
                 radius: markerRadius,
@@ -2844,16 +2375,8 @@ fetch("geo_22_看護小規模多機能型居宅介護.geojson")
             });
         }
     });
-    // データ取得完了後、チェックボックスがONなら元地図へ追加。
-    const busOrFacilityCb = document.querySelector(`.${label === "バス停留所" ? "bus-toggle" : "facility-toggle"}[value="${label}"]`);
-    if (busOrFacilityCb && busOrFacilityCb.checked) {
-        facilityLayers["看護小規模多機能型居宅介護"].addTo(map);
-        setTimeout(() => {
-            if (myRenderer && myRenderer._requestRedraw) myRenderer._requestRedraw();
-        }, 50);
-    }
 })
-.catch(e => { console.error("GeoJSON読込エラー: 看護小規模多機能型居宅介護", e); });
+.catch(e => {});
 
 fetch("geo_22_地域密着型通所介護.geojson")
 .then(res => res.json())
@@ -2865,8 +2388,6 @@ fetch("geo_22_地域密着型通所介護.geojson")
             const markerRadius = (shape === 'star') ? 12 : ((shape === 'circle') ? 5 : 8);
 
             return new L.CustomMarker(latlng, {
-                // 元画面では従来どおり同じRendererを使用。
-                // 印刷時だけcloneLayerForPrint()内で専用Rendererへ複製する。
                 renderer: myRenderer,
                 shape: shape,
                 radius: markerRadius,
@@ -2892,16 +2413,8 @@ fetch("geo_22_地域密着型通所介護.geojson")
             });
         }
     });
-    // データ取得完了後、チェックボックスがONなら元地図へ追加。
-    const busOrFacilityCb = document.querySelector(`.${label === "バス停留所" ? "bus-toggle" : "facility-toggle"}[value="${label}"]`);
-    if (busOrFacilityCb && busOrFacilityCb.checked) {
-        facilityLayers["地域密着型通所介護"].addTo(map);
-        setTimeout(() => {
-            if (myRenderer && myRenderer._requestRedraw) myRenderer._requestRedraw();
-        }, 50);
-    }
 })
-.catch(e => { console.error("GeoJSON読込エラー: 地域密着型通所介護", e); });
+.catch(e => {});
 
 fetch("geo_22_バス停留所.geojson")
 .then(res => res.json())
@@ -2913,8 +2426,6 @@ fetch("geo_22_バス停留所.geojson")
             const markerRadius = (shape === 'star') ? 12 : ((shape === 'circle') ? 5 : 8);
 
             return new L.CustomMarker(latlng, {
-                // 元画面では従来どおり同じRendererを使用。
-                // 印刷時だけcloneLayerForPrint()内で専用Rendererへ複製する。
                 renderer: myRenderer,
                 shape: shape,
                 radius: markerRadius,
@@ -2940,16 +2451,8 @@ fetch("geo_22_バス停留所.geojson")
             });
         }
     });
-    // データ取得完了後、チェックボックスがONなら元地図へ追加。
-    const busOrFacilityCb = document.querySelector(`.${label === "バス停留所" ? "bus-toggle" : "facility-toggle"}[value="${label}"]`);
-    if (busOrFacilityCb && busOrFacilityCb.checked) {
-        facilityLayers["バス停留所"].addTo(map);
-        setTimeout(() => {
-            if (myRenderer && myRenderer._requestRedraw) myRenderer._requestRedraw();
-        }, 50);
-    }
 })
-.catch(e => { console.error("GeoJSON読込エラー: バス停留所", e); });
+.catch(e => {});
 
     ['controls', 'search-panel', 'route-panel', 'text-config-panel', 'info-panel', 'hazard-legend'].forEach(id => {
         const el = document.getElementById(id);
@@ -3251,451 +2754,6 @@ fetch("geo_22_バス停留所.geojson")
         if (currentImgMarker) finalizeImage(currentImgMarker);
         document.getElementById('image-config-panel').style.display = 'none';
     }
-  
-    // ==========================================================
-    // 防災マップ A4 分割印刷
-    // ==========================================================
-    let printPreviewMaps = [];
-
-    function togglePrintPanel() {
-        const p = document.getElementById('print-panel');
-        p.style.display = (p.style.display === 'block') ? 'none' : 'block';
-        closeControlsPanel();
-    }
-
-    function getPrintGrid() {
-        const v = document.getElementById('print-grid-size').value.split('x');
-        return { cols: parseInt(v[0]), rows: parseInt(v[1]) };
-    }
-
-    function showPrintGrid() {
-        const overlay = document.getElementById('print-grid-overlay');
-        const data = getPrintBounds();
-
-        overlay.innerHTML = '';
-        overlay.style.display = 'block';
-
-        // 「分割印刷ページを作成」と全く同じ印刷範囲を使う。
-        // map.project() の座標を、現在の地図コンテナ上の座標へ変換する。
-        const mapContainer = map.getContainer();
-        const rect = mapContainer.getBoundingClientRect();
-        const mapSize = map.getSize();
-        const centerPixel = map.project(map.getCenter(), data.zoom);
-
-        function toScreenPoint(p) {
-            return {
-                x: rect.left + mapSize.x / 2 + (p.x - centerPixel.x),
-                y: rect.top  + mapSize.y / 2 + (p.y - centerPixel.y)
-            };
-        }
-
-        const swScreen = toScreenPoint(data.sw);
-        const neScreen = toScreenPoint(data.ne);
-
-        // 印刷範囲の外枠
-        const outer = document.createElement('div');
-        outer.style.position = 'absolute';
-        outer.style.left = `${Math.min(swScreen.x, neScreen.x)}px`;
-        outer.style.top = `${Math.min(swScreen.y, neScreen.y)}px`;
-        outer.style.width = `${Math.abs(neScreen.x - swScreen.x)}px`;
-        outer.style.height = `${Math.abs(neScreen.y - swScreen.y)}px`;
-        outer.style.border = '3px solid #ff0000';
-        outer.style.boxSizing = 'border-box';
-        outer.style.background = 'transparent';
-        overlay.appendChild(outer);
-
-        const totalW = Math.abs(neScreen.x - swScreen.x);
-        const totalH = Math.abs(neScreen.y - swScreen.y);
-        const left = Math.min(swScreen.x, neScreen.x);
-        const top = Math.min(swScreen.y, neScreen.y);
-
-        // 内部の分割線
-        for (let c = 1; c < data.cols; c++) {
-            const line = document.createElement('div');
-            line.className = 'print-grid-line';
-            line.style.left = `${left + totalW * c / data.cols}px`;
-            line.style.top = `${top}px`;
-            line.style.width = '3px';
-            line.style.height = `${totalH}px`;
-            overlay.appendChild(line);
-        }
-
-        for (let r = 1; r < data.rows; r++) {
-            const line = document.createElement('div');
-            line.className = 'print-grid-line';
-            line.style.left = `${left}px`;
-            line.style.top = `${top + totalH * r / data.rows}px`;
-            line.style.width = `${totalW}px`;
-            line.style.height = '3px';
-            overlay.appendChild(line);
-        }
-
-        // ページ番号
-        let n = 1;
-        for (let r = 0; r < data.rows; r++) {
-            for (let c = 0; c < data.cols; c++) {
-                const lab = document.createElement('div');
-                lab.className = 'print-grid-label';
-                lab.textContent = `${n} / ${data.cols * data.rows}`;
-                lab.style.left = `${left + totalW * c / data.cols + 7}px`;
-                lab.style.top = `${top + totalH * r / data.rows + 7}px`;
-                overlay.appendChild(lab);
-                n++;
-            }
-        }
-
-        const orientationText =
-            document.getElementById('print-orientation').value === 'portrait'
-                ? 'A4縦'
-                : 'A4横';
-
-        alert(
-            `${orientationText}・${data.cols}×${data.rows} の実際の印刷範囲を表示しました。
-` +
-            `赤枠は「② 分割印刷ページを作成」と同じ範囲です。`
-        );
-    }
-
-    function closePrintGrid() {
-        const o=document.getElementById('print-grid-overlay');
-        if(o) o.style.display='none';
-    }
-
-    function cloneLayerForPrint(layer, targetMap) {
-        try {
-            if (layer instanceof L.TileLayer) {
-                return null; // タイルは後で現在の設定から複製
-            }
-
-            // ユーザーが地図上に追加したテキスト・画像を複製する。
-            // これらはGeoJSONではなくL.Marker(L.DivIcon)なので、
-            // toGeoJSON()だけでは文字や画像の内容が失われる。
-            if (layer instanceof L.Marker) {
-                const el = layer.getElement && layer.getElement();
-                const isCustomText = !!((el && el.classList && el.classList.contains('custom-text-marker')) || (el && el.querySelector && el.querySelector('.custom-text-marker')) || (layer.options && layer.options.icon && layer.options.icon.options && String(layer.options.icon.options.className || '').includes('custom-text-marker')));
-                const isCustomImage = !!(el && el.querySelector && el.querySelector('.map-added-image'));
-
-                if (isCustomText || isCustomImage) {
-                    const icon = layer.getIcon ? layer.getIcon() : null;
-                    if (!icon) return null;
-
-                    const opts = Object.assign({}, icon.options || {});
-                    // DOMから現在表示されているHTMLを取得。
-                    // これにより、画像の拡大縮小・回転やテキストの書式を保持する。
-                    opts.html = icon.options?.html || (el ? el.innerHTML : '');
-                    opts.className = icon.options?.className || '';
-                    opts.iconSize = icon.options?.iconSize || [0, 0];
-                    opts.iconAnchor = icon.options?.iconAnchor || [0, 0];
-
-                    const copy = L.marker(layer.getLatLng(), {
-                        icon: L.divIcon(opts),
-                        interactive: false,
-                        keyboard: false
-                    }).addTo(targetMap);
-
-                    return copy;
-                }
-
-                return null;
-            }
-
-            if (layer instanceof L.GeoJSON || layer instanceof L.FeatureGroup) {
-                // 施設・バス停などのカスタムマーカーは、GeoJSONを単純に
-                // circleMarkerへ変換すると元の鮮明な形・色・大きさが失われる。
-                // 元レイヤーの子レイヤーを直接複製して、CustomMarkerを保持する。
-                const group = L.featureGroup();
-
-                if (layer.eachLayer) {
-                    layer.eachLayer(src => {
-                        try {
-                            const ll = src.getLatLng ? src.getLatLng() : null;
-
-                            if (ll && src instanceof L.CustomMarker) {
-                                const o = Object.assign({}, src.options || {});
-                                // 元地図のRendererを共有せず、印刷用地図専用Rendererを使用
-                                o.renderer = targetMap.__printRenderer || L.canvas({ padding: 0.5 });
-                                const copy = new L.CustomMarker(ll, o);
-
-                                if (src.getPopup && src.getPopup()) {
-                                    copy.bindPopup(src.getPopup().getContent(), {
-                                        maxWidth: src.getPopup().options?.maxWidth || 260
-                                    });
-                                }
-                                group.addLayer(copy);
-                                return;
-                            }
-
-                            if (ll && src instanceof L.CircleMarker) {
-                                const o = Object.assign({}, src.options || {});
-                                group.addLayer(L.circleMarker(ll, o));
-                                return;
-                            }
-
-                            if (src instanceof L.Marker) {
-                                const icon = src.getIcon ? src.getIcon() : null;
-                                if (icon) {
-                                    const o = Object.assign({}, icon.options || {});
-                                    o.html = icon.options?.html || '';
-                                    group.addLayer(L.marker(ll, {
-                                        icon: L.divIcon(o),
-                                        interactive: false,
-                                        keyboard: false
-                                    }));
-                                }
-                                return;
-                            }
-
-                            if (src instanceof L.Polyline) {
-                                group.addLayer(L.polyline(src.getLatLngs(), Object.assign({}, src.options || {})));
-                                return;
-                            }
-
-                            if (src instanceof L.Polygon) {
-                                group.addLayer(L.polygon(src.getLatLngs(), Object.assign({}, src.options || {})));
-                                return;
-                            }
-                        } catch(e) {
-                            console.warn('個別レイヤー複製失敗', e);
-                        }
-                    });
-                }
-
-                if (group.getLayers().length) {
-                    return group.addTo(targetMap);
-                }
-
-                // 子レイヤーを取得できない場合の予備処理
-                const gj = layer.toGeoJSON ? layer.toGeoJSON() : null;
-                if (gj) {
-                    return L.geoJSON(gj, {
-                        pane: 'overlayPane',
-                        pointToLayer: (feature, latlng) => L.circleMarker(latlng, {
-                            radius: 5,
-                            color: '#3388ff',
-                            weight: 1,
-                            fillColor: '#3388ff',
-                            fillOpacity: 0.7
-                        }),
-                        style: () => ({
-                            color:'#3388ff', weight:1, fillOpacity:0.15
-                        })
-                    }).addTo(targetMap);
-                }
-            }
-        } catch(e) {
-            console.warn('印刷用レイヤー複製失敗', e);
-        }
-    }
-
-    function addPrintBaseLayer(targetMap) {
-        let selected = '標準';
-        const checked = document.querySelector('input[name="baseLayer"]:checked');
-        if (checked) selected = checked.value;
-        if (baseLayers[selected]) {
-            const options = Object.assign({}, baseLayers[selected].options || {});
-            delete options.attribution;
-            L.tileLayer(baseLayers[selected]._url, options).addTo(targetMap);
-        }
-        document.querySelectorAll('.hazard-toggle:checked').forEach(cb => {
-            const h = hazardLayers[cb.value];
-            if (h) {
-                const options = Object.assign({}, h.options || {});
-                delete options.attribution;
-                const layer = L.tileLayer(h._url, options);
-                layer.addTo(targetMap);
-            }
-        });
-    }
-
-    function getPrintBounds() {
-        // 「① 印刷範囲を表示」と「② 分割印刷ページを作成」が
-        // 必ず同じ境界を使用するための共通計算。
-        const {cols, rows} = getPrintGrid();
-        const orientation = document.getElementById('print-orientation').value;
-
-        // A4の実寸比率
-        // 横：297 / 210、縦：210 / 297
-        const pageRatio = orientation === 'portrait'
-            ? 210 / 297
-            : 297 / 210;
-
-        // 3×3なら、ページ1枚の比率を3倍したものが全体の比率。
-        const totalRatio = (cols * pageRatio) / rows;
-
-        const center = map.getCenter();
-        const zoom = map.getZoom();
-        const size = map.getSize();
-
-        // 現在の地図画面内に収まる最大の「印刷全体範囲」を作る。
-        let totalW = size.y * totalRatio;
-        let totalH = size.y;
-
-        if (totalW > size.x) {
-            totalW = size.x;
-            totalH = totalW / totalRatio;
-        }
-
-        const centerPixel = map.project(center, zoom);
-
-        const sw = L.point(
-            centerPixel.x - totalW / 2,
-            centerPixel.y - totalH / 2
-        );
-        const ne = L.point(
-            centerPixel.x + totalW / 2,
-            centerPixel.y + totalH / 2
-        );
-
-        return {
-            sw,
-            ne,
-            zoom,
-            totalW,
-            totalH,
-            cols,
-            rows,
-            pageRatio,
-            orientation
-        };
-    }
-
-    async function createPosterPrint() {
-        // 「① 印刷範囲を表示」で表示した境界線は残す。
-        // 分割印刷ページの作成時にも、同じ範囲を確認できるようにする。
-        const data = getPrintBounds();
-        const preview = document.getElementById('print-preview');
-        const inner = document.getElementById('print-preview-inner');
-        inner.innerHTML = '';
-        printPreviewMaps.forEach(m => { try { m.remove(); } catch(e){} });
-        printPreviewMaps=[];
-
-        const pageW = data.pageRatio;
-        const totalPages = data.cols * data.rows;
-
-        for(let r=0;r<data.rows;r++){
-            for(let c=0;c<data.cols;c++){
-                const pageNo = r*data.cols+c+1;
-                const page = document.createElement('div');
-                page.className='print-page' + (document.getElementById('print-orientation').value === 'portrait' ? ' portrait' : '');
-                page.style.aspectRatio = `${pageW}`;
-                const title=document.createElement('div');
-                title.className='print-page-title';
-                title.textContent=`静岡県 防災マップ　${pageNo} / ${totalPages}`;
-                page.appendChild(title);
-                const mapDiv=document.createElement('div');
-                mapDiv.className='print-page-map';
-                mapDiv.id=`poster-map-${pageNo}`;
-                page.appendChild(mapDiv);
-                inner.appendChild(page);
-
-                const x1=data.sw.x + (data.totalW/data.cols)*c;
-                const x2=data.sw.x + (data.totalW/data.cols)*(c+1);
-                const y1=data.sw.y + (data.totalH/data.rows)*r;
-                const y2=data.sw.y + (data.totalH/data.rows)*(r+1);
-                const mid=L.point((x1+x2)/2,(y1+y2)/2);
-
-                // 各A4ページが全体の1ページ分だけを表示するようズームを調整
-                const pagePixelW = data.totalW / data.cols;
-                const pagePixelH = data.totalH / data.rows;
-                const isPortrait = document.getElementById('print-orientation').value === 'portrait';
-                const pageCssW = isPortrait ? 793 : 1122;
-                const pageCssH = isPortrait ? 1122 : 793;
-                const scaleX = pageCssW / pagePixelW;
-                const scaleY = pageCssH / pagePixelH;
-                const pageZoom = data.zoom + Math.log2(Math.min(scaleX, scaleY));
-
-                const pm=L.map(mapDiv,{
-                    center:map.unproject(mid,data.zoom),
-                    zoom:pageZoom,
-                    zoomSnap:0,
-                    zoomDelta:0.1,
-                    zoomControl:false,
-                    attributionControl:false,
-                    preferCanvas:true,
-                    dragging:false,
-                    scrollWheelZoom:false,
-                    doubleClickZoom:false,
-                    boxZoom:false,
-                    keyboard:false,
-                    touchZoom:false
-                });
-
-                // ★重要：印刷用地図では元地図の myRenderer を共有しない。
-                // CustomMarker は Canvas Renderer を使用しているため、
-                // 同じ Renderer を複数の Leaflet 地図で共有すると、
-                // 元の地図の病院・診療所等のマーカーが消えることがある。
-                // 印刷ページごとに専用Rendererを作成する。
-                pm.__printRenderer = L.canvas({ padding: 0.5 });
-
-                // ハザードタイルは元の地図で「hazardPane」を使用している。
-                // 印刷用Leaflet地図にも同じPaneを作らないと、
-                // 洪水・津波・高潮などのタイルを追加できない。
-                pm.createPane('hazardPane');
-                pm.getPane('hazardPane').style.zIndex = 300;
-                pm.getPane('hazardPane').style.pointerEvents = 'none';
-
-                addPrintBaseLayer(pm);
-
-                // 現在ONになっている施設・境界線を複製
-                document.querySelectorAll('.facility-toggle:checked,.bus-toggle:checked,.boundary-toggle:checked').forEach(cb=>{
-                    const layer=(facilityLayers[cb.value]||boundaryLayers[cb.value]);
-                    if(layer) cloneLayerForPrint(layer,pm);
-                });
-
-                // 現在地図上の描画物・ユーザー追加テキスト・画像を複製
-                map.eachLayer(layer=>{
-                    if(layer instanceof L.Polyline || layer instanceof L.Polygon || layer instanceof L.Circle){
-                        if(layer.options?.pane !== 'hazardPane' && layer.options?.pane !== 'boundaryPane'){
-                            try { L.geoJSON(layer.toGeoJSON()).addTo(pm); } catch(e){}
-                        }
-                    }
-
-                    // 「Ｔ」で追加したテキスト、および画像ツールで追加したJPG等を
-                    // 印刷用地図にも同じ緯度経度で配置する。
-                    if(layer instanceof L.Marker){
-                        try {
-                            const el = layer.getElement && layer.getElement();
-                            const isCustomText = !!((el && el.classList && el.classList.contains('custom-text-marker')) || (el && el.querySelector && el.querySelector('.custom-text-marker')) || (layer.options && layer.options.icon && layer.options.icon.options && String(layer.options.icon.options.className || '').includes('custom-text-marker')));
-                            const isCustomImage = !!(el && el.querySelector && el.querySelector('.map-added-image'));
-
-                            if(isCustomText || isCustomImage){
-                                cloneLayerForPrint(layer, pm);
-                            }
-                        } catch(e) {
-                            console.warn('テキスト・画像の印刷用複製失敗', e);
-                        }
-                    }
-                });
-
-                printPreviewMaps.push(pm);
-            }
-        }
-
-        preview.style.display='block';
-        setTimeout(()=>{
-            printPreviewMaps.forEach(m=>m.invalidateSize());
-        },500);
-
-        alert('印刷用ページを作成しました。\n地図タイルの読み込みが完了するまで少し待ってから、ブラウザの「印刷」を実行してください。\nA4・実際のサイズ（倍率100%）を選択してください。');
-    }
-
-    function closePrintPreview() {
-        // 印刷画面を閉じて元の地図へ戻る際は、
-        // 「① 印刷範囲を表示」で出した赤い境界線も必ず消す。
-        const preview = document.getElementById('print-preview');
-        if (preview) preview.style.display='none';
-
-        printPreviewMaps.forEach(m=>{try{m.remove();}catch(e){}});
-        printPreviewMaps=[];
-
-        // 元の地図を通常表示へ戻す。
-        closePrintGrid();
-
-        // 印刷パネルも閉じて、元の地図をそのまま操作できる状態にする。
-        const panel = document.getElementById('print-panel');
-        if (panel) panel.style.display='none';
-    }
-
-</script>
+  </script>
 </body>
 </html>
