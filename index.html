@@ -3002,7 +3002,8 @@ fetch("geo_22_バス停留所.geojson")
 
                             if (ll && src instanceof L.CustomMarker) {
                                 const o = Object.assign({}, src.options || {});
-                                o.renderer = myRenderer;
+                                // 元地図のRendererを共有せず、印刷用地図専用Rendererを使用
+                                o.renderer = targetMap.__printRenderer || L.canvas({ padding: 0.5 });
                                 const copy = new L.CustomMarker(ll, o);
 
                                 if (src.getPopup && src.getPopup()) {
@@ -3208,6 +3209,13 @@ fetch("geo_22_バス停留所.geojson")
                     keyboard:false,
                     touchZoom:false
                 });
+
+                // ★重要：印刷用地図では元地図の myRenderer を共有しない。
+                // CustomMarker は Canvas Renderer を使用しているため、
+                // 同じ Renderer を複数の Leaflet 地図で共有すると、
+                // 元の地図の病院・診療所等のマーカーが消えることがある。
+                // 印刷ページごとに専用Rendererを作成する。
+                pm.__printRenderer = L.canvas({ padding: 0.5 });
 
                 // ハザードタイルは元の地図で「hazardPane」を使用している。
                 // 印刷用Leaflet地図にも同じPaneを作らないと、
