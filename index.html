@@ -2962,7 +2962,7 @@ fetch("geo_22_バス停留所.geojson")
             // toGeoJSON()だけでは文字や画像の内容が失われる。
             if (layer instanceof L.Marker) {
                 const el = layer.getElement && layer.getElement();
-                const isCustomText = !!(el && el.querySelector && el.querySelector('.custom-text-marker'));
+                const isCustomText = !!((el && el.classList && el.classList.contains('custom-text-marker')) || (el && el.querySelector && el.querySelector('.custom-text-marker')) || (layer.options && layer.options.icon && layer.options.icon.options && String(layer.options.icon.options.className || '').includes('custom-text-marker')));
                 const isCustomImage = !!(el && el.querySelector && el.querySelector('.map-added-image'));
 
                 if (isCustomText || isCustomImage) {
@@ -3167,7 +3167,7 @@ fetch("geo_22_バス停留所.geojson")
                     if(layer instanceof L.Marker){
                         try {
                             const el = layer.getElement && layer.getElement();
-                            const isCustomText = !!(el && el.querySelector && el.querySelector('.custom-text-marker'));
+                            const isCustomText = !!((el && el.classList && el.classList.contains('custom-text-marker')) || (el && el.querySelector && el.querySelector('.custom-text-marker')) || (layer.options && layer.options.icon && layer.options.icon.options && String(layer.options.icon.options.className || '').includes('custom-text-marker')));
                             const isCustomImage = !!(el && el.querySelector && el.querySelector('.map-added-image'));
 
                             if(isCustomText || isCustomImage){
