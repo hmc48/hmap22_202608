@@ -2860,44 +2860,90 @@ fetch("geo_22_バス停留所.geojson")
 
     function showPrintGrid() {
         const overlay = document.getElementById('print-grid-overlay');
-        const {cols, rows} = getPrintGrid();
+        const data = getPrintBounds();
+
         overlay.innerHTML = '';
         overlay.style.display = 'block';
 
-        const w = window.innerWidth / cols;
-        const h = window.innerHeight / rows;
+        // 「分割印刷ページを作成」と全く同じ印刷範囲を使う。
+        // map.project() の座標を、現在の地図コンテナ上の座標へ変換する。
+        const mapContainer = map.getContainer();
+        const rect = mapContainer.getBoundingClientRect();
+        const mapSize = map.getSize();
+        const centerPixel = map.project(map.getCenter(), data.zoom);
 
-        for (let c = 1; c < cols; c++) {
+        function toScreenPoint(p) {
+            return {
+                x: rect.left + mapSize.x / 2 + (p.x - centerPixel.x),
+                y: rect.top  + mapSize.y / 2 + (p.y - centerPixel.y)
+            };
+        }
+
+        const swScreen = toScreenPoint(data.sw);
+        const neScreen = toScreenPoint(data.ne);
+
+        // 印刷範囲の外枠
+        const outer = document.createElement('div');
+        outer.style.position = 'absolute';
+        outer.style.left = `${Math.min(swScreen.x, neScreen.x)}px`;
+        outer.style.top = `${Math.min(swScreen.y, neScreen.y)}px`;
+        outer.style.width = `${Math.abs(neScreen.x - swScreen.x)}px`;
+        outer.style.height = `${Math.abs(neScreen.y - swScreen.y)}px`;
+        outer.style.border = '3px solid #ff0000';
+        outer.style.boxSizing = 'border-box';
+        outer.style.background = 'transparent';
+        overlay.appendChild(outer);
+
+        const totalW = Math.abs(neScreen.x - swScreen.x);
+        const totalH = Math.abs(neScreen.y - swScreen.y);
+        const left = Math.min(swScreen.x, neScreen.x);
+        const top = Math.min(swScreen.y, neScreen.y);
+
+        // 内部の分割線
+        for (let c = 1; c < data.cols; c++) {
             const line = document.createElement('div');
             line.className = 'print-grid-line';
-            line.style.left = `${c*w}px`;
-            line.style.top = '0';
-            line.style.width = '2px';
-            line.style.height = '100%';
+            line.style.left = `${left + totalW * c / data.cols}px`;
+            line.style.top = `${top}px`;
+            line.style.width = '3px';
+            line.style.height = `${totalH}px`;
             overlay.appendChild(line);
         }
-        for (let r = 1; r < rows; r++) {
+
+        for (let r = 1; r < data.rows; r++) {
             const line = document.createElement('div');
             line.className = 'print-grid-line';
-            line.style.left = '0';
-            line.style.top = `${r*h}px`;
-            line.style.width = '100%';
-            line.style.height = '2px';
+            line.style.left = `${left}px`;
+            line.style.top = `${top + totalH * r / data.rows}px`;
+            line.style.width = `${totalW}px`;
+            line.style.height = '3px';
             overlay.appendChild(line);
         }
-        let n=1;
-        for(let r=0;r<rows;r++){
-            for(let c=0;c<cols;c++){
-                const lab=document.createElement('div');
-                lab.className='print-grid-label';
-                lab.textContent=`${n} / ${cols*rows}`;
-                lab.style.left=`${c*w+6}px`;
-                lab.style.top=`${r*h+6}px`;
+
+        // ページ番号
+        let n = 1;
+        for (let r = 0; r < data.rows; r++) {
+            for (let c = 0; c < data.cols; c++) {
+                const lab = document.createElement('div');
+                lab.className = 'print-grid-label';
+                lab.textContent = `${n} / ${data.cols * data.rows}`;
+                lab.style.left = `${left + totalW * c / data.cols + 7}px`;
+                lab.style.top = `${top + totalH * r / data.rows + 7}px`;
                 overlay.appendChild(lab);
                 n++;
             }
         }
-        alert(`A4 ${cols}×${rows} の分割位置を表示しました。\n地図を調整する場合は「閉じる」ではなく、印刷パネルを閉じて地図を操作してください。`);
+
+        const orientationText =
+            document.getElementById('print-orientation').value === 'portrait'
+                ? 'A4縦'
+                : 'A4横';
+
+        alert(
+            `${orientationText}・${data.cols}×${data.rows} の実際の印刷範囲を表示しました。
+` +
+            `赤枠は「② 分割印刷ページを作成」と同じ範囲です。`
+        );
     }
 
     function closePrintGrid() {
@@ -2957,27 +3003,55 @@ fetch("geo_22_バス停留所.geojson")
     }
 
     function getPrintBounds() {
-        // A4横3×3等の全体比率に合わせて、現在の中心から印刷範囲を決定。
+        // 「① 印刷範囲を表示」と「② 分割印刷ページを作成」が
+        // 必ず同じ境界を使用するための共通計算。
         const {cols, rows} = getPrintGrid();
         const orientation = document.getElementById('print-orientation').value;
-        const pageRatio = orientation === 'portrait' ? 210/297 : 297/210;
+
+        // A4の実寸比率
+        // 横：297 / 210、縦：210 / 297
+        const pageRatio = orientation === 'portrait'
+            ? 210 / 297
+            : 297 / 210;
+
+        // 3×3なら、ページ1枚の比率を3倍したものが全体の比率。
         const totalRatio = (cols * pageRatio) / rows;
 
         const center = map.getCenter();
         const zoom = map.getZoom();
         const size = map.getSize();
 
-        // 現在画面の高さを基準に、選択範囲をA4全体比率へ調整
+        // 現在の地図画面内に収まる最大の「印刷全体範囲」を作る。
+        let totalW = size.y * totalRatio;
         let totalH = size.y;
-        let totalW = totalH * totalRatio;
+
         if (totalW > size.x) {
             totalW = size.x;
             totalH = totalW / totalRatio;
         }
-        const cp = map.project(center, zoom);
-        const sw = L.point(cp.x-totalW/2, cp.y-totalH/2);
-        const ne = L.point(cp.x+totalW/2, cp.y+totalH/2);
-        return { sw, ne, zoom, totalW, totalH, cols, rows, pageRatio };
+
+        const centerPixel = map.project(center, zoom);
+
+        const sw = L.point(
+            centerPixel.x - totalW / 2,
+            centerPixel.y - totalH / 2
+        );
+        const ne = L.point(
+            centerPixel.x + totalW / 2,
+            centerPixel.y + totalH / 2
+        );
+
+        return {
+            sw,
+            ne,
+            zoom,
+            totalW,
+            totalH,
+            cols,
+            rows,
+            pageRatio,
+            orientation
+        };
     }
 
     async function createPosterPrint() {
