@@ -164,6 +164,62 @@ button.menu-sub-btn { flex: 1; padding: 8px; font-size: 11px; cursor: pointer; }
 .img-sample { width: 40px; height: 40px; cursor: pointer; border: 1px solid #ccc; object-fit: cover; }
 .img-sample:hover { border-color: #fd63db; }
 .editing-image { outline: 2px dashed #ff4500; cursor: move; }
+
+/* ===== 防災マップ分割印刷 ===== */
+#print-map-btn {
+  top: 290px; right: 15px; background:#198754; color:white;
+}
+#print-panel {
+  display:none; position:fixed; top:55px; right:65px; width:260px;
+  background:white; padding:12px; border-radius:8px; z-index:6000;
+  box-shadow:0 4px 15px rgba(0,0,0,0.25); font-size:13px;
+}
+#print-panel select, #print-panel button {
+  width:100%; box-sizing:border-box; padding:7px; margin-top:6px;
+}
+#print-grid-overlay {
+  display:none; position:fixed; left:0; top:0; width:100vw; height:100vh;
+  z-index:4500; pointer-events:none;
+}
+.print-grid-line {
+  position:absolute; background:#ff0000; opacity:.85;
+}
+.print-grid-label {
+  position:absolute; background:rgba(255,255,255,.9); color:#d00;
+  border:1px solid #d00; padding:2px 5px; font-weight:bold; font-size:12px;
+}
+#print-preview {
+  display:none; position:fixed; inset:0; z-index:10000; background:#777;
+  overflow:auto; padding:20px; box-sizing:border-box;
+}
+#print-preview-inner { display:flex; flex-direction:column; align-items:center; gap:18px; }
+.print-page {
+  width:1122px; height:793px; background:white; position:relative;
+  box-sizing:border-box; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,.35);
+}
+.print-page-title {
+  position:absolute; left:10px; top:8px; z-index:1000; background:rgba(255,255,255,.9);
+  padding:4px 8px; font-weight:bold; font-size:13px;
+}
+.print-page.portrait { width:793px; height:1122px; }
+.print-page-map { position:absolute; left:0; right:0; top:0; bottom:0; }
+.print-close {
+  position:fixed; right:20px; top:15px; z-index:11000; padding:8px 14px;
+  background:#dc3545; color:white; border:0; border-radius:5px; cursor:pointer;
+  font-size:14px;
+}
+.print-help { font-size:11px; color:#555; line-height:1.45; margin-top:6px; }
+@media print {
+  body > *:not(#print-preview) { display:none !important; }
+  #print-preview { display:block !important; position:static; padding:0; background:white; overflow:visible; }
+  #print-preview-inner { display:block; }
+  .print-page {
+    width:297mm; height:210mm; margin:0; box-shadow:none; page-break-after:always;
+  }
+  .print-page:last-child { page-break-after:auto; }
+  .print-close { display:none !important; }
+}
+
 </style>
 </head>
 <body>
@@ -321,6 +377,34 @@ button.menu-sub-btn { flex: 1; padding: 8px; font-size: 11px; cursor: pointer; }
   
   <div id="route-btn" class="circle-btn right-tool" title="経路検索" onclick="toggleRouteMode()">🚗</div>
   <div id="reload-btn" class="circle-btn right-tool" title="初期化" onclick="confirmReload()">↩️</div>
+  <div id="print-map-btn" class="circle-btn right-tool" title="防災マップ印刷" onclick="togglePrintPanel()">🖨️</div>
+  <div id="print-panel">
+    <span class="close-x" onclick="togglePrintPanel()">×</span>
+    <div class="section-title">防災マップ印刷</div>
+    <div style="margin-top:8px;">分割数</div>
+    <select id="print-grid-size">
+      <option value="2x2">A4 4枚（2×2）</option>
+      <option value="3x3" selected>A4 9枚（3×3）</option>
+      <option value="4x4">A4 16枚（4×4）</option>
+    </select>
+    <div style="margin-top:8px;">用紙方向</div>
+    <select id="print-orientation">
+      <option value="landscape" selected>A4横</option>
+      <option value="portrait">A4縦</option>
+    </select>
+    <button onclick="showPrintGrid()" style="background:#198754;color:white;border:0;">① 印刷範囲を表示</button>
+    <button onclick="createPosterPrint()" style="background:#0d6efd;color:white;border:0;">② 分割印刷ページを作成</button>
+    <div class="print-help">
+      現在の地図範囲を基準に、A4ページへ分割します。<br>
+      先に地図を移動・拡大縮小して、印刷したい範囲を表示してください。<br>
+      「②」を押すと印刷用の9ページが表示されます。
+    </div>
+  </div>
+  <div id="print-grid-overlay"></div>
+  <div id="print-preview">
+    <button class="print-close" onclick="closePrintPreview()">閉じる</button>
+    <div id="print-preview-inner"></div>
+  </div>
   
   <div id="route-panel">
     <span class="close-x" onclick="toggleRouteMode()">×</span>
@@ -2754,6 +2838,227 @@ fetch("geo_22_バス停留所.geojson")
         if (currentImgMarker) finalizeImage(currentImgMarker);
         document.getElementById('image-config-panel').style.display = 'none';
     }
-  </script>
+  
+    // ==========================================================
+    // 防災マップ A4 分割印刷
+    // ==========================================================
+    let printPreviewMaps = [];
+
+    function togglePrintPanel() {
+        const p = document.getElementById('print-panel');
+        p.style.display = (p.style.display === 'block') ? 'none' : 'block';
+        closeControlsPanel();
+    }
+
+    function getPrintGrid() {
+        const v = document.getElementById('print-grid-size').value.split('x');
+        return { cols: parseInt(v[0]), rows: parseInt(v[1]) };
+    }
+
+    function showPrintGrid() {
+        const overlay = document.getElementById('print-grid-overlay');
+        const {cols, rows} = getPrintGrid();
+        overlay.innerHTML = '';
+        overlay.style.display = 'block';
+
+        const w = window.innerWidth / cols;
+        const h = window.innerHeight / rows;
+
+        for (let c = 1; c < cols; c++) {
+            const line = document.createElement('div');
+            line.className = 'print-grid-line';
+            line.style.left = `${c*w}px`;
+            line.style.top = '0';
+            line.style.width = '2px';
+            line.style.height = '100%';
+            overlay.appendChild(line);
+        }
+        for (let r = 1; r < rows; r++) {
+            const line = document.createElement('div');
+            line.className = 'print-grid-line';
+            line.style.left = '0';
+            line.style.top = `${r*h}px`;
+            line.style.width = '100%';
+            line.style.height = '2px';
+            overlay.appendChild(line);
+        }
+        let n=1;
+        for(let r=0;r<rows;r++){
+            for(let c=0;c<cols;c++){
+                const lab=document.createElement('div');
+                lab.className='print-grid-label';
+                lab.textContent=`${n} / ${cols*rows}`;
+                lab.style.left=`${c*w+6}px`;
+                lab.style.top=`${r*h+6}px`;
+                overlay.appendChild(lab);
+                n++;
+            }
+        }
+        alert(`A4 ${cols}×${rows} の分割位置を表示しました。\n地図を調整する場合は「閉じる」ではなく、印刷パネルを閉じて地図を操作してください。`);
+    }
+
+    function closePrintGrid() {
+        const o=document.getElementById('print-grid-overlay');
+        if(o) o.style.display='none';
+    }
+
+    function cloneLayerForPrint(layer, targetMap) {
+        try {
+            if (layer instanceof L.TileLayer) {
+                return null; // タイルは後で現在の設定から複製
+            }
+            if (layer instanceof L.GeoJSON || layer instanceof L.FeatureGroup) {
+                const gj = layer.toGeoJSON ? layer.toGeoJSON() : null;
+                if (gj) {
+                    return L.geoJSON(gj, {
+                        pane: 'overlayPane',
+                        pointToLayer: (feature, latlng) => {
+                            const p = layer.getLayers ? layer.getLayers()[0] : null;
+                            return L.circleMarker(latlng, {
+                                radius: p?.options?.radius || 5,
+                                color: p?.options?.color || '#3388ff',
+                                weight: p?.options?.weight || 1,
+                                fillColor: p?.options?.fillColor || '#3388ff',
+                                fillOpacity: p?.options?.fillOpacity ?? 0.7
+                            });
+                        },
+                        style: feature => ({
+                            color:'#3388ff', weight:1, fillOpacity:0.15
+                        })
+                    }).addTo(targetMap);
+                }
+            }
+        } catch(e) {
+            console.warn('印刷用レイヤー複製失敗', e);
+        }
+    }
+
+    function addPrintBaseLayer(targetMap) {
+        let selected = '標準';
+        const checked = document.querySelector('input[name="baseLayer"]:checked');
+        if (checked) selected = checked.value;
+        if (baseLayers[selected]) {
+            const options = Object.assign({}, baseLayers[selected].options || {});
+            delete options.attribution;
+            L.tileLayer(baseLayers[selected]._url, options).addTo(targetMap);
+        }
+        document.querySelectorAll('.hazard-toggle:checked').forEach(cb => {
+            const h = hazardLayers[cb.value];
+            if (h) {
+                const options = Object.assign({}, h.options || {});
+                delete options.attribution;
+                const layer = L.tileLayer(h._url, options);
+                layer.addTo(targetMap);
+            }
+        });
+    }
+
+    function getPrintBounds() {
+        // A4横3×3等の全体比率に合わせて、現在の中心から印刷範囲を決定。
+        const {cols, rows} = getPrintGrid();
+        const orientation = document.getElementById('print-orientation').value;
+        const pageRatio = orientation === 'portrait' ? 210/297 : 297/210;
+        const totalRatio = (cols * pageRatio) / rows;
+
+        const center = map.getCenter();
+        const zoom = map.getZoom();
+        const size = map.getSize();
+
+        // 現在画面の高さを基準に、選択範囲をA4全体比率へ調整
+        let totalH = size.y;
+        let totalW = totalH * totalRatio;
+        if (totalW > size.x) {
+            totalW = size.x;
+            totalH = totalW / totalRatio;
+        }
+        const cp = map.project(center, zoom);
+        const sw = L.point(cp.x-totalW/2, cp.y-totalH/2);
+        const ne = L.point(cp.x+totalW/2, cp.y+totalH/2);
+        return { sw, ne, zoom, totalW, totalH, cols, rows, pageRatio };
+    }
+
+    async function createPosterPrint() {
+        closePrintGrid();
+        const data = getPrintBounds();
+        const preview = document.getElementById('print-preview');
+        const inner = document.getElementById('print-preview-inner');
+        inner.innerHTML = '';
+        printPreviewMaps.forEach(m => { try { m.remove(); } catch(e){} });
+        printPreviewMaps=[];
+
+        const pageW = data.pageRatio;
+        const totalPages = data.cols * data.rows;
+
+        for(let r=0;r<data.rows;r++){
+            for(let c=0;c<data.cols;c++){
+                const pageNo = r*data.cols+c+1;
+                const page = document.createElement('div');
+                page.className='print-page' + (document.getElementById('print-orientation').value === 'portrait' ? ' portrait' : '');
+                page.style.aspectRatio = `${pageW}`;
+                const title=document.createElement('div');
+                title.className='print-page-title';
+                title.textContent=`静岡県 防災マップ　${pageNo} / ${totalPages}`;
+                page.appendChild(title);
+                const mapDiv=document.createElement('div');
+                mapDiv.className='print-page-map';
+                mapDiv.id=`poster-map-${pageNo}`;
+                page.appendChild(mapDiv);
+                inner.appendChild(page);
+
+                const x1=data.sw.x + (data.totalW/data.cols)*c;
+                const x2=data.sw.x + (data.totalW/data.cols)*(c+1);
+                const y1=data.sw.y + (data.totalH/data.rows)*r;
+                const y2=data.sw.y + (data.totalH/data.rows)*(r+1);
+                const mid=L.point((x1+x2)/2,(y1+y2)/2);
+
+                const pm=L.map(mapDiv,{
+                    center:map.unproject(mid,data.zoom),
+                    zoom:data.zoom,
+                    zoomControl:false,
+                    attributionControl:false,
+                    preferCanvas:true,
+                    dragging:false,
+                    scrollWheelZoom:false,
+                    doubleClickZoom:false,
+                    boxZoom:false,
+                    keyboard:false,
+                    touchZoom:false
+                });
+                addPrintBaseLayer(pm);
+
+                // 現在ONになっている施設・境界線を複製
+                document.querySelectorAll('.facility-toggle:checked,.bus-toggle:checked,.boundary-toggle:checked').forEach(cb=>{
+                    const layer=(facilityLayers[cb.value]||boundaryLayers[cb.value]);
+                    if(layer) cloneLayerForPrint(layer,pm);
+                });
+
+                // 現在地図上の描画物を可能な範囲で複製
+                map.eachLayer(layer=>{
+                    if(layer instanceof L.Polyline || layer instanceof L.Polygon || layer instanceof L.Circle){
+                        if(layer.options?.pane !== 'hazardPane' && layer.options?.pane !== 'boundaryPane'){
+                            try { L.geoJSON(layer.toGeoJSON()).addTo(pm); } catch(e){}
+                        }
+                    }
+                });
+
+                printPreviewMaps.push(pm);
+            }
+        }
+
+        preview.style.display='block';
+        setTimeout(()=>{
+            printPreviewMaps.forEach(m=>m.invalidateSize());
+        },500);
+
+        alert('印刷用ページを作成しました。\n地図タイルの読み込みが完了するまで少し待ってから、ブラウザの「印刷」を実行してください。\nA4・実際のサイズ（倍率100%）を選択してください。');
+    }
+
+    function closePrintPreview() {
+        document.getElementById('print-preview').style.display='none';
+        printPreviewMaps.forEach(m=>{try{m.remove();}catch(e){}});
+        printPreviewMaps=[];
+    }
+
+</script>
 </body>
 </html>
