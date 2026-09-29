@@ -2990,21 +2990,82 @@ fetch("geo_22_バス停留所.geojson")
             }
 
             if (layer instanceof L.GeoJSON || layer instanceof L.FeatureGroup) {
+                // 施設・バス停などのカスタムマーカーは、GeoJSONを単純に
+                // circleMarkerへ変換すると元の鮮明な形・色・大きさが失われる。
+                // 元レイヤーの子レイヤーを直接複製して、CustomMarkerを保持する。
+                const group = L.featureGroup();
+
+                if (layer.eachLayer) {
+                    layer.eachLayer(src => {
+                        try {
+                            const ll = src.getLatLng ? src.getLatLng() : null;
+
+                            if (ll && src instanceof L.CustomMarker) {
+                                const o = Object.assign({}, src.options || {});
+                                o.renderer = myRenderer;
+                                const copy = new L.CustomMarker(ll, o);
+
+                                if (src.getPopup && src.getPopup()) {
+                                    copy.bindPopup(src.getPopup().getContent(), {
+                                        maxWidth: src.getPopup().options?.maxWidth || 260
+                                    });
+                                }
+                                group.addLayer(copy);
+                                return;
+                            }
+
+                            if (ll && src instanceof L.CircleMarker) {
+                                const o = Object.assign({}, src.options || {});
+                                group.addLayer(L.circleMarker(ll, o));
+                                return;
+                            }
+
+                            if (src instanceof L.Marker) {
+                                const icon = src.getIcon ? src.getIcon() : null;
+                                if (icon) {
+                                    const o = Object.assign({}, icon.options || {});
+                                    o.html = icon.options?.html || '';
+                                    group.addLayer(L.marker(ll, {
+                                        icon: L.divIcon(o),
+                                        interactive: false,
+                                        keyboard: false
+                                    }));
+                                }
+                                return;
+                            }
+
+                            if (src instanceof L.Polyline) {
+                                group.addLayer(L.polyline(src.getLatLngs(), Object.assign({}, src.options || {})));
+                                return;
+                            }
+
+                            if (src instanceof L.Polygon) {
+                                group.addLayer(L.polygon(src.getLatLngs(), Object.assign({}, src.options || {})));
+                                return;
+                            }
+                        } catch(e) {
+                            console.warn('個別レイヤー複製失敗', e);
+                        }
+                    });
+                }
+
+                if (group.getLayers().length) {
+                    return group.addTo(targetMap);
+                }
+
+                // 子レイヤーを取得できない場合の予備処理
                 const gj = layer.toGeoJSON ? layer.toGeoJSON() : null;
                 if (gj) {
                     return L.geoJSON(gj, {
                         pane: 'overlayPane',
-                        pointToLayer: (feature, latlng) => {
-                            const p = layer.getLayers ? layer.getLayers()[0] : null;
-                            return L.circleMarker(latlng, {
-                                radius: p?.options?.radius || 5,
-                                color: p?.options?.color || '#3388ff',
-                                weight: p?.options?.weight || 1,
-                                fillColor: p?.options?.fillColor || '#3388ff',
-                                fillOpacity: p?.options?.fillOpacity ?? 0.7
-                            });
-                        },
-                        style: feature => ({
+                        pointToLayer: (feature, latlng) => L.circleMarker(latlng, {
+                            radius: 5,
+                            color: '#3388ff',
+                            weight: 1,
+                            fillColor: '#3388ff',
+                            fillOpacity: 0.7
+                        }),
+                        style: () => ({
                             color:'#3388ff', weight:1, fillOpacity:0.15
                         })
                     }).addTo(targetMap);
