@@ -476,6 +476,8 @@ button.menu-sub-btn { flex: 1; padding: 8px; font-size: 11px; cursor: pointer; }
     const shapeMap = {"病院": "star", "診療所": "heart", "歯科": "club", "助産院": "square", "薬局": "spade", "バス停留所": "triangle"};
 
     const myRenderer = L.canvas({ padding: 0.5 });
+    // バス停留所は元画面専用のRendererを分離し、印刷処理の影響を受けないようにする。
+    const busRenderer = L.canvas({ padding: 0.5 });
 
     L.CustomMarker = L.CircleMarker.extend({
         _updatePath: function () {
@@ -993,7 +995,7 @@ fetch("geo_22_1.geojson")
             const markerRadius = (shape === 'star') ? 12 : ((shape === 'circle') ? 5 : 8);
 
             return new L.CustomMarker(latlng, {
-                renderer: myRenderer,
+                renderer: ("病院" === "バス停留所" ? busRenderer : myRenderer),
                 shape: shape,
                 radius: markerRadius,
                 fillColor: color,
@@ -1018,8 +1020,17 @@ fetch("geo_22_1.geojson")
             });
         }
     });
+    // データ取得完了後に、チェックボックスがONなら確実に元地図へ追加する。
+    const busOrFacilityCb = document.querySelector(`.${label === "バス停留所" ? "bus-toggle" : "facility-toggle"}[value="${label}"]`);
+    if (busOrFacilityCb && busOrFacilityCb.checked) {
+        facilityLayers["病院"].addTo(map);
+        setTimeout(() => {
+            const r = "病院" === "バス停留所" ? busRenderer : myRenderer;
+            if (r && r._requestRedraw) r._requestRedraw();
+        }, 50);
+    }
 })
-.catch(e => {});
+.catch(e => { console.error("GeoJSON読込エラー: 病院", e); });
 
 fetch("geo_22_2.geojson")
 .then(res => res.json())
@@ -1031,7 +1042,7 @@ fetch("geo_22_2.geojson")
             const markerRadius = (shape === 'star') ? 12 : ((shape === 'circle') ? 5 : 8);
 
             return new L.CustomMarker(latlng, {
-                renderer: myRenderer,
+                renderer: ("診療所" === "バス停留所" ? busRenderer : myRenderer),
                 shape: shape,
                 radius: markerRadius,
                 fillColor: color,
@@ -1056,8 +1067,17 @@ fetch("geo_22_2.geojson")
             });
         }
     });
+    // データ取得完了後に、チェックボックスがONなら確実に元地図へ追加する。
+    const busOrFacilityCb = document.querySelector(`.${label === "バス停留所" ? "bus-toggle" : "facility-toggle"}[value="${label}"]`);
+    if (busOrFacilityCb && busOrFacilityCb.checked) {
+        facilityLayers["診療所"].addTo(map);
+        setTimeout(() => {
+            const r = "診療所" === "バス停留所" ? busRenderer : myRenderer;
+            if (r && r._requestRedraw) r._requestRedraw();
+        }, 50);
+    }
 })
-.catch(e => {});
+.catch(e => { console.error("GeoJSON読込エラー: 診療所", e); });
 
 fetch("geo_22_3.geojson")
 .then(res => res.json())
@@ -1069,7 +1089,7 @@ fetch("geo_22_3.geojson")
             const markerRadius = (shape === 'star') ? 12 : ((shape === 'circle') ? 5 : 8);
 
             return new L.CustomMarker(latlng, {
-                renderer: myRenderer,
+                renderer: ("歯科" === "バス停留所" ? busRenderer : myRenderer),
                 shape: shape,
                 radius: markerRadius,
                 fillColor: color,
@@ -1094,8 +1114,17 @@ fetch("geo_22_3.geojson")
             });
         }
     });
+    // データ取得完了後に、チェックボックスがONなら確実に元地図へ追加する。
+    const busOrFacilityCb = document.querySelector(`.${label === "バス停留所" ? "bus-toggle" : "facility-toggle"}[value="${label}"]`);
+    if (busOrFacilityCb && busOrFacilityCb.checked) {
+        facilityLayers["歯科"].addTo(map);
+        setTimeout(() => {
+            const r = "歯科" === "バス停留所" ? busRenderer : myRenderer;
+            if (r && r._requestRedraw) r._requestRedraw();
+        }, 50);
+    }
 })
-.catch(e => {});
+.catch(e => { console.error("GeoJSON読込エラー: 歯科", e); });
 
 fetch("geo_22_4.geojson")
 .then(res => res.json())
@@ -1107,7 +1136,7 @@ fetch("geo_22_4.geojson")
             const markerRadius = (shape === 'star') ? 12 : ((shape === 'circle') ? 5 : 8);
 
             return new L.CustomMarker(latlng, {
-                renderer: myRenderer,
+                renderer: ("助産院" === "バス停留所" ? busRenderer : myRenderer),
                 shape: shape,
                 radius: markerRadius,
                 fillColor: color,
@@ -1132,8 +1161,17 @@ fetch("geo_22_4.geojson")
             });
         }
     });
+    // データ取得完了後に、チェックボックスがONなら確実に元地図へ追加する。
+    const busOrFacilityCb = document.querySelector(`.${label === "バス停留所" ? "bus-toggle" : "facility-toggle"}[value="${label}"]`);
+    if (busOrFacilityCb && busOrFacilityCb.checked) {
+        facilityLayers["助産院"].addTo(map);
+        setTimeout(() => {
+            const r = "助産院" === "バス停留所" ? busRenderer : myRenderer;
+            if (r && r._requestRedraw) r._requestRedraw();
+        }, 50);
+    }
 })
-.catch(e => {});
+.catch(e => { console.error("GeoJSON読込エラー: 助産院", e); });
 
 fetch("geo_22_5.geojson")
 .then(res => res.json())
@@ -1145,7 +1183,7 @@ fetch("geo_22_5.geojson")
             const markerRadius = (shape === 'star') ? 12 : ((shape === 'circle') ? 5 : 8);
 
             return new L.CustomMarker(latlng, {
-                renderer: myRenderer,
+                renderer: ("薬局" === "バス停留所" ? busRenderer : myRenderer),
                 shape: shape,
                 radius: markerRadius,
                 fillColor: color,
@@ -1170,8 +1208,17 @@ fetch("geo_22_5.geojson")
             });
         }
     });
+    // データ取得完了後に、チェックボックスがONなら確実に元地図へ追加する。
+    const busOrFacilityCb = document.querySelector(`.${label === "バス停留所" ? "bus-toggle" : "facility-toggle"}[value="${label}"]`);
+    if (busOrFacilityCb && busOrFacilityCb.checked) {
+        facilityLayers["薬局"].addTo(map);
+        setTimeout(() => {
+            const r = "薬局" === "バス停留所" ? busRenderer : myRenderer;
+            if (r && r._requestRedraw) r._requestRedraw();
+        }, 50);
+    }
 })
-.catch(e => {});
+.catch(e => { console.error("GeoJSON読込エラー: 薬局", e); });
 
 fetch("geo_22_訪問介護.geojson")
 .then(res => res.json())
@@ -1183,7 +1230,7 @@ fetch("geo_22_訪問介護.geojson")
             const markerRadius = (shape === 'star') ? 12 : ((shape === 'circle') ? 5 : 8);
 
             return new L.CustomMarker(latlng, {
-                renderer: myRenderer,
+                renderer: ("訪問介護" === "バス停留所" ? busRenderer : myRenderer),
                 shape: shape,
                 radius: markerRadius,
                 fillColor: color,
@@ -1208,8 +1255,17 @@ fetch("geo_22_訪問介護.geojson")
             });
         }
     });
+    // データ取得完了後に、チェックボックスがONなら確実に元地図へ追加する。
+    const busOrFacilityCb = document.querySelector(`.${label === "バス停留所" ? "bus-toggle" : "facility-toggle"}[value="${label}"]`);
+    if (busOrFacilityCb && busOrFacilityCb.checked) {
+        facilityLayers["訪問介護"].addTo(map);
+        setTimeout(() => {
+            const r = "訪問介護" === "バス停留所" ? busRenderer : myRenderer;
+            if (r && r._requestRedraw) r._requestRedraw();
+        }, 50);
+    }
 })
-.catch(e => {});
+.catch(e => { console.error("GeoJSON読込エラー: 訪問介護", e); });
 
 fetch("geo_22_訪問入浴介護.geojson")
 .then(res => res.json())
@@ -1221,7 +1277,7 @@ fetch("geo_22_訪問入浴介護.geojson")
             const markerRadius = (shape === 'star') ? 12 : ((shape === 'circle') ? 5 : 8);
 
             return new L.CustomMarker(latlng, {
-                renderer: myRenderer,
+                renderer: ("訪問入浴介護" === "バス停留所" ? busRenderer : myRenderer),
                 shape: shape,
                 radius: markerRadius,
                 fillColor: color,
@@ -1246,8 +1302,17 @@ fetch("geo_22_訪問入浴介護.geojson")
             });
         }
     });
+    // データ取得完了後に、チェックボックスがONなら確実に元地図へ追加する。
+    const busOrFacilityCb = document.querySelector(`.${label === "バス停留所" ? "bus-toggle" : "facility-toggle"}[value="${label}"]`);
+    if (busOrFacilityCb && busOrFacilityCb.checked) {
+        facilityLayers["訪問入浴介護"].addTo(map);
+        setTimeout(() => {
+            const r = "訪問入浴介護" === "バス停留所" ? busRenderer : myRenderer;
+            if (r && r._requestRedraw) r._requestRedraw();
+        }, 50);
+    }
 })
-.catch(e => {});
+.catch(e => { console.error("GeoJSON読込エラー: 訪問入浴介護", e); });
 
 fetch("geo_22_訪問看護.geojson")
 .then(res => res.json())
@@ -1259,7 +1324,7 @@ fetch("geo_22_訪問看護.geojson")
             const markerRadius = (shape === 'star') ? 12 : ((shape === 'circle') ? 5 : 8);
 
             return new L.CustomMarker(latlng, {
-                renderer: myRenderer,
+                renderer: ("訪問看護" === "バス停留所" ? busRenderer : myRenderer),
                 shape: shape,
                 radius: markerRadius,
                 fillColor: color,
@@ -1284,8 +1349,17 @@ fetch("geo_22_訪問看護.geojson")
             });
         }
     });
+    // データ取得完了後に、チェックボックスがONなら確実に元地図へ追加する。
+    const busOrFacilityCb = document.querySelector(`.${label === "バス停留所" ? "bus-toggle" : "facility-toggle"}[value="${label}"]`);
+    if (busOrFacilityCb && busOrFacilityCb.checked) {
+        facilityLayers["訪問看護"].addTo(map);
+        setTimeout(() => {
+            const r = "訪問看護" === "バス停留所" ? busRenderer : myRenderer;
+            if (r && r._requestRedraw) r._requestRedraw();
+        }, 50);
+    }
 })
-.catch(e => {});
+.catch(e => { console.error("GeoJSON読込エラー: 訪問看護", e); });
 
 fetch("geo_22_訪問リハビリテーション.geojson")
 .then(res => res.json())
@@ -1297,7 +1371,7 @@ fetch("geo_22_訪問リハビリテーション.geojson")
             const markerRadius = (shape === 'star') ? 12 : ((shape === 'circle') ? 5 : 8);
 
             return new L.CustomMarker(latlng, {
-                renderer: myRenderer,
+                renderer: ("訪問リハビリテーション" === "バス停留所" ? busRenderer : myRenderer),
                 shape: shape,
                 radius: markerRadius,
                 fillColor: color,
@@ -1322,8 +1396,17 @@ fetch("geo_22_訪問リハビリテーション.geojson")
             });
         }
     });
+    // データ取得完了後に、チェックボックスがONなら確実に元地図へ追加する。
+    const busOrFacilityCb = document.querySelector(`.${label === "バス停留所" ? "bus-toggle" : "facility-toggle"}[value="${label}"]`);
+    if (busOrFacilityCb && busOrFacilityCb.checked) {
+        facilityLayers["訪問リハビリテーション"].addTo(map);
+        setTimeout(() => {
+            const r = "訪問リハビリテーション" === "バス停留所" ? busRenderer : myRenderer;
+            if (r && r._requestRedraw) r._requestRedraw();
+        }, 50);
+    }
 })
-.catch(e => {});
+.catch(e => { console.error("GeoJSON読込エラー: 訪問リハビリテーション", e); });
 
 fetch("geo_22_通所介護.geojson")
 .then(res => res.json())
@@ -1335,7 +1418,7 @@ fetch("geo_22_通所介護.geojson")
             const markerRadius = (shape === 'star') ? 12 : ((shape === 'circle') ? 5 : 8);
 
             return new L.CustomMarker(latlng, {
-                renderer: myRenderer,
+                renderer: ("通所介護" === "バス停留所" ? busRenderer : myRenderer),
                 shape: shape,
                 radius: markerRadius,
                 fillColor: color,
@@ -1360,8 +1443,17 @@ fetch("geo_22_通所介護.geojson")
             });
         }
     });
+    // データ取得完了後に、チェックボックスがONなら確実に元地図へ追加する。
+    const busOrFacilityCb = document.querySelector(`.${label === "バス停留所" ? "bus-toggle" : "facility-toggle"}[value="${label}"]`);
+    if (busOrFacilityCb && busOrFacilityCb.checked) {
+        facilityLayers["通所介護"].addTo(map);
+        setTimeout(() => {
+            const r = "通所介護" === "バス停留所" ? busRenderer : myRenderer;
+            if (r && r._requestRedraw) r._requestRedraw();
+        }, 50);
+    }
 })
-.catch(e => {});
+.catch(e => { console.error("GeoJSON読込エラー: 通所介護", e); });
 
 fetch("geo_22_通所介護（療養通所介護）.geojson")
 .then(res => res.json())
@@ -1373,7 +1465,7 @@ fetch("geo_22_通所介護（療養通所介護）.geojson")
             const markerRadius = (shape === 'star') ? 12 : ((shape === 'circle') ? 5 : 8);
 
             return new L.CustomMarker(latlng, {
-                renderer: myRenderer,
+                renderer: ("通所介護（療養通所介護）" === "バス停留所" ? busRenderer : myRenderer),
                 shape: shape,
                 radius: markerRadius,
                 fillColor: color,
@@ -1398,8 +1490,17 @@ fetch("geo_22_通所介護（療養通所介護）.geojson")
             });
         }
     });
+    // データ取得完了後に、チェックボックスがONなら確実に元地図へ追加する。
+    const busOrFacilityCb = document.querySelector(`.${label === "バス停留所" ? "bus-toggle" : "facility-toggle"}[value="${label}"]`);
+    if (busOrFacilityCb && busOrFacilityCb.checked) {
+        facilityLayers["通所介護（療養通所介護）"].addTo(map);
+        setTimeout(() => {
+            const r = "通所介護（療養通所介護）" === "バス停留所" ? busRenderer : myRenderer;
+            if (r && r._requestRedraw) r._requestRedraw();
+        }, 50);
+    }
 })
-.catch(e => {});
+.catch(e => { console.error("GeoJSON読込エラー: 通所介護（療養通所介護）", e); });
 
 fetch("geo_22_通所リハビリテーション.geojson")
 .then(res => res.json())
@@ -1411,7 +1512,7 @@ fetch("geo_22_通所リハビリテーション.geojson")
             const markerRadius = (shape === 'star') ? 12 : ((shape === 'circle') ? 5 : 8);
 
             return new L.CustomMarker(latlng, {
-                renderer: myRenderer,
+                renderer: ("通所リハビリテーション" === "バス停留所" ? busRenderer : myRenderer),
                 shape: shape,
                 radius: markerRadius,
                 fillColor: color,
@@ -1436,8 +1537,17 @@ fetch("geo_22_通所リハビリテーション.geojson")
             });
         }
     });
+    // データ取得完了後に、チェックボックスがONなら確実に元地図へ追加する。
+    const busOrFacilityCb = document.querySelector(`.${label === "バス停留所" ? "bus-toggle" : "facility-toggle"}[value="${label}"]`);
+    if (busOrFacilityCb && busOrFacilityCb.checked) {
+        facilityLayers["通所リハビリテーション"].addTo(map);
+        setTimeout(() => {
+            const r = "通所リハビリテーション" === "バス停留所" ? busRenderer : myRenderer;
+            if (r && r._requestRedraw) r._requestRedraw();
+        }, 50);
+    }
 })
-.catch(e => {});
+.catch(e => { console.error("GeoJSON読込エラー: 通所リハビリテーション", e); });
 
 fetch("geo_22_福祉用具貸与.geojson")
 .then(res => res.json())
@@ -1449,7 +1559,7 @@ fetch("geo_22_福祉用具貸与.geojson")
             const markerRadius = (shape === 'star') ? 12 : ((shape === 'circle') ? 5 : 8);
 
             return new L.CustomMarker(latlng, {
-                renderer: myRenderer,
+                renderer: ("福祉用具貸与" === "バス停留所" ? busRenderer : myRenderer),
                 shape: shape,
                 radius: markerRadius,
                 fillColor: color,
@@ -1474,8 +1584,17 @@ fetch("geo_22_福祉用具貸与.geojson")
             });
         }
     });
+    // データ取得完了後に、チェックボックスがONなら確実に元地図へ追加する。
+    const busOrFacilityCb = document.querySelector(`.${label === "バス停留所" ? "bus-toggle" : "facility-toggle"}[value="${label}"]`);
+    if (busOrFacilityCb && busOrFacilityCb.checked) {
+        facilityLayers["福祉用具貸与"].addTo(map);
+        setTimeout(() => {
+            const r = "福祉用具貸与" === "バス停留所" ? busRenderer : myRenderer;
+            if (r && r._requestRedraw) r._requestRedraw();
+        }, 50);
+    }
 })
-.catch(e => {});
+.catch(e => { console.error("GeoJSON読込エラー: 福祉用具貸与", e); });
 
 fetch("geo_22_短期入所生活介護.geojson")
 .then(res => res.json())
@@ -1487,7 +1606,7 @@ fetch("geo_22_短期入所生活介護.geojson")
             const markerRadius = (shape === 'star') ? 12 : ((shape === 'circle') ? 5 : 8);
 
             return new L.CustomMarker(latlng, {
-                renderer: myRenderer,
+                renderer: ("短期入所生活介護" === "バス停留所" ? busRenderer : myRenderer),
                 shape: shape,
                 radius: markerRadius,
                 fillColor: color,
@@ -1512,8 +1631,17 @@ fetch("geo_22_短期入所生活介護.geojson")
             });
         }
     });
+    // データ取得完了後に、チェックボックスがONなら確実に元地図へ追加する。
+    const busOrFacilityCb = document.querySelector(`.${label === "バス停留所" ? "bus-toggle" : "facility-toggle"}[value="${label}"]`);
+    if (busOrFacilityCb && busOrFacilityCb.checked) {
+        facilityLayers["短期入所生活介護"].addTo(map);
+        setTimeout(() => {
+            const r = "短期入所生活介護" === "バス停留所" ? busRenderer : myRenderer;
+            if (r && r._requestRedraw) r._requestRedraw();
+        }, 50);
+    }
 })
-.catch(e => {});
+.catch(e => { console.error("GeoJSON読込エラー: 短期入所生活介護", e); });
 
 fetch("geo_22_短期入所療養介護（介護老人保健施設）.geojson")
 .then(res => res.json())
@@ -1525,7 +1653,7 @@ fetch("geo_22_短期入所療養介護（介護老人保健施設）.geojson")
             const markerRadius = (shape === 'star') ? 12 : ((shape === 'circle') ? 5 : 8);
 
             return new L.CustomMarker(latlng, {
-                renderer: myRenderer,
+                renderer: ("短期入所療養介護（介護老人保健施設）" === "バス停留所" ? busRenderer : myRenderer),
                 shape: shape,
                 radius: markerRadius,
                 fillColor: color,
@@ -1550,8 +1678,17 @@ fetch("geo_22_短期入所療養介護（介護老人保健施設）.geojson")
             });
         }
     });
+    // データ取得完了後に、チェックボックスがONなら確実に元地図へ追加する。
+    const busOrFacilityCb = document.querySelector(`.${label === "バス停留所" ? "bus-toggle" : "facility-toggle"}[value="${label}"]`);
+    if (busOrFacilityCb && busOrFacilityCb.checked) {
+        facilityLayers["短期入所療養介護（介護老人保健施設）"].addTo(map);
+        setTimeout(() => {
+            const r = "短期入所療養介護（介護老人保健施設）" === "バス停留所" ? busRenderer : myRenderer;
+            if (r && r._requestRedraw) r._requestRedraw();
+        }, 50);
+    }
 })
-.catch(e => {});
+.catch(e => { console.error("GeoJSON読込エラー: 短期入所療養介護（介護老人保健施設）", e); });
 
 fetch("geo_22_短期入所療養介護（療養病床を有する病院等）.geojson")
 .then(res => res.json())
@@ -1563,7 +1700,7 @@ fetch("geo_22_短期入所療養介護（療養病床を有する病院等）.ge
             const markerRadius = (shape === 'star') ? 12 : ((shape === 'circle') ? 5 : 8);
 
             return new L.CustomMarker(latlng, {
-                renderer: myRenderer,
+                renderer: ("短期入所療養介護（療養病床を有する病院等）" === "バス停留所" ? busRenderer : myRenderer),
                 shape: shape,
                 radius: markerRadius,
                 fillColor: color,
@@ -1588,8 +1725,17 @@ fetch("geo_22_短期入所療養介護（療養病床を有する病院等）.ge
             });
         }
     });
+    // データ取得完了後に、チェックボックスがONなら確実に元地図へ追加する。
+    const busOrFacilityCb = document.querySelector(`.${label === "バス停留所" ? "bus-toggle" : "facility-toggle"}[value="${label}"]`);
+    if (busOrFacilityCb && busOrFacilityCb.checked) {
+        facilityLayers["短期入所療養介護（療養病床を有する病院等）"].addTo(map);
+        setTimeout(() => {
+            const r = "短期入所療養介護（療養病床を有する病院等）" === "バス停留所" ? busRenderer : myRenderer;
+            if (r && r._requestRedraw) r._requestRedraw();
+        }, 50);
+    }
 })
-.catch(e => {});
+.catch(e => { console.error("GeoJSON読込エラー: 短期入所療養介護（療養病床を有する病院等）", e); });
 
 fetch("geo_22_短期入所療養介護（介護医療院）.geojson")
 .then(res => res.json())
@@ -1601,7 +1747,7 @@ fetch("geo_22_短期入所療養介護（介護医療院）.geojson")
             const markerRadius = (shape === 'star') ? 12 : ((shape === 'circle') ? 5 : 8);
 
             return new L.CustomMarker(latlng, {
-                renderer: myRenderer,
+                renderer: ("短期入所療養介護（介護医療院）" === "バス停留所" ? busRenderer : myRenderer),
                 shape: shape,
                 radius: markerRadius,
                 fillColor: color,
@@ -1626,8 +1772,17 @@ fetch("geo_22_短期入所療養介護（介護医療院）.geojson")
             });
         }
     });
+    // データ取得完了後に、チェックボックスがONなら確実に元地図へ追加する。
+    const busOrFacilityCb = document.querySelector(`.${label === "バス停留所" ? "bus-toggle" : "facility-toggle"}[value="${label}"]`);
+    if (busOrFacilityCb && busOrFacilityCb.checked) {
+        facilityLayers["短期入所療養介護（介護医療院）"].addTo(map);
+        setTimeout(() => {
+            const r = "短期入所療養介護（介護医療院）" === "バス停留所" ? busRenderer : myRenderer;
+            if (r && r._requestRedraw) r._requestRedraw();
+        }, 50);
+    }
 })
-.catch(e => {});
+.catch(e => { console.error("GeoJSON読込エラー: 短期入所療養介護（介護医療院）", e); });
 
 fetch("geo_22_認知症対応型共同生活介護.geojson")
 .then(res => res.json())
@@ -1639,7 +1794,7 @@ fetch("geo_22_認知症対応型共同生活介護.geojson")
             const markerRadius = (shape === 'star') ? 12 : ((shape === 'circle') ? 5 : 8);
 
             return new L.CustomMarker(latlng, {
-                renderer: myRenderer,
+                renderer: ("認知症対応型共同生活介護" === "バス停留所" ? busRenderer : myRenderer),
                 shape: shape,
                 radius: markerRadius,
                 fillColor: color,
@@ -1664,8 +1819,17 @@ fetch("geo_22_認知症対応型共同生活介護.geojson")
             });
         }
     });
+    // データ取得完了後に、チェックボックスがONなら確実に元地図へ追加する。
+    const busOrFacilityCb = document.querySelector(`.${label === "バス停留所" ? "bus-toggle" : "facility-toggle"}[value="${label}"]`);
+    if (busOrFacilityCb && busOrFacilityCb.checked) {
+        facilityLayers["認知症対応型共同生活介護"].addTo(map);
+        setTimeout(() => {
+            const r = "認知症対応型共同生活介護" === "バス停留所" ? busRenderer : myRenderer;
+            if (r && r._requestRedraw) r._requestRedraw();
+        }, 50);
+    }
 })
-.catch(e => {});
+.catch(e => { console.error("GeoJSON読込エラー: 認知症対応型共同生活介護", e); });
 
 fetch("geo_22_特定施設入居者生活介護（有料老人ホーム）.geojson")
 .then(res => res.json())
@@ -1677,7 +1841,7 @@ fetch("geo_22_特定施設入居者生活介護（有料老人ホーム）.geojs
             const markerRadius = (shape === 'star') ? 12 : ((shape === 'circle') ? 5 : 8);
 
             return new L.CustomMarker(latlng, {
-                renderer: myRenderer,
+                renderer: ("特定施設入居者生活介護（有料老人ホーム）" === "バス停留所" ? busRenderer : myRenderer),
                 shape: shape,
                 radius: markerRadius,
                 fillColor: color,
@@ -1702,8 +1866,17 @@ fetch("geo_22_特定施設入居者生活介護（有料老人ホーム）.geojs
             });
         }
     });
+    // データ取得完了後に、チェックボックスがONなら確実に元地図へ追加する。
+    const busOrFacilityCb = document.querySelector(`.${label === "バス停留所" ? "bus-toggle" : "facility-toggle"}[value="${label}"]`);
+    if (busOrFacilityCb && busOrFacilityCb.checked) {
+        facilityLayers["特定施設入居者生活介護（有料老人ホーム）"].addTo(map);
+        setTimeout(() => {
+            const r = "特定施設入居者生活介護（有料老人ホーム）" === "バス停留所" ? busRenderer : myRenderer;
+            if (r && r._requestRedraw) r._requestRedraw();
+        }, 50);
+    }
 })
-.catch(e => {});
+.catch(e => { console.error("GeoJSON読込エラー: 特定施設入居者生活介護（有料老人ホーム）", e); });
 
 fetch("geo_22_特定施設入居者生活介護（軽費老人ホーム）.geojson")
 .then(res => res.json())
@@ -1715,7 +1888,7 @@ fetch("geo_22_特定施設入居者生活介護（軽費老人ホーム）.geojs
             const markerRadius = (shape === 'star') ? 12 : ((shape === 'circle') ? 5 : 8);
 
             return new L.CustomMarker(latlng, {
-                renderer: myRenderer,
+                renderer: ("特定施設入居者生活介護（軽費老人ホーム）" === "バス停留所" ? busRenderer : myRenderer),
                 shape: shape,
                 radius: markerRadius,
                 fillColor: color,
@@ -1740,8 +1913,17 @@ fetch("geo_22_特定施設入居者生活介護（軽費老人ホーム）.geojs
             });
         }
     });
+    // データ取得完了後に、チェックボックスがONなら確実に元地図へ追加する。
+    const busOrFacilityCb = document.querySelector(`.${label === "バス停留所" ? "bus-toggle" : "facility-toggle"}[value="${label}"]`);
+    if (busOrFacilityCb && busOrFacilityCb.checked) {
+        facilityLayers["特定施設入居者生活介護（軽費老人ホーム）"].addTo(map);
+        setTimeout(() => {
+            const r = "特定施設入居者生活介護（軽費老人ホーム）" === "バス停留所" ? busRenderer : myRenderer;
+            if (r && r._requestRedraw) r._requestRedraw();
+        }, 50);
+    }
 })
-.catch(e => {});
+.catch(e => { console.error("GeoJSON読込エラー: 特定施設入居者生活介護（軽費老人ホーム）", e); });
 
 fetch("geo_22_特定施設入居者生活介護（サービス付き高齢者向け住宅）.geojson")
 .then(res => res.json())
@@ -1753,7 +1935,7 @@ fetch("geo_22_特定施設入居者生活介護（サービス付き高齢者向
             const markerRadius = (shape === 'star') ? 12 : ((shape === 'circle') ? 5 : 8);
 
             return new L.CustomMarker(latlng, {
-                renderer: myRenderer,
+                renderer: ("特定施設入居者生活介護（サービス付き高齢者向け住宅）" === "バス停留所" ? busRenderer : myRenderer),
                 shape: shape,
                 radius: markerRadius,
                 fillColor: color,
@@ -1778,8 +1960,17 @@ fetch("geo_22_特定施設入居者生活介護（サービス付き高齢者向
             });
         }
     });
+    // データ取得完了後に、チェックボックスがONなら確実に元地図へ追加する。
+    const busOrFacilityCb = document.querySelector(`.${label === "バス停留所" ? "bus-toggle" : "facility-toggle"}[value="${label}"]`);
+    if (busOrFacilityCb && busOrFacilityCb.checked) {
+        facilityLayers["特定施設入居者生活介護（サービス付き高齢者向け住宅）"].addTo(map);
+        setTimeout(() => {
+            const r = "特定施設入居者生活介護（サービス付き高齢者向け住宅）" === "バス停留所" ? busRenderer : myRenderer;
+            if (r && r._requestRedraw) r._requestRedraw();
+        }, 50);
+    }
 })
-.catch(e => {});
+.catch(e => { console.error("GeoJSON読込エラー: 特定施設入居者生活介護（サービス付き高齢者向け住宅）", e); });
 
 fetch("geo_22_特定施設入居者生活介護（有料老人ホーム・外部サービス利用型）.geojson")
 .then(res => res.json())
@@ -1791,7 +1982,7 @@ fetch("geo_22_特定施設入居者生活介護（有料老人ホーム・外部
             const markerRadius = (shape === 'star') ? 12 : ((shape === 'circle') ? 5 : 8);
 
             return new L.CustomMarker(latlng, {
-                renderer: myRenderer,
+                renderer: ("特定施設入居者生活介護（有料老人ホーム・外部サービス利用型）" === "バス停留所" ? busRenderer : myRenderer),
                 shape: shape,
                 radius: markerRadius,
                 fillColor: color,
@@ -1816,8 +2007,17 @@ fetch("geo_22_特定施設入居者生活介護（有料老人ホーム・外部
             });
         }
     });
+    // データ取得完了後に、チェックボックスがONなら確実に元地図へ追加する。
+    const busOrFacilityCb = document.querySelector(`.${label === "バス停留所" ? "bus-toggle" : "facility-toggle"}[value="${label}"]`);
+    if (busOrFacilityCb && busOrFacilityCb.checked) {
+        facilityLayers["特定施設入居者生活介護（有料老人ホーム・外部サービス利用型）"].addTo(map);
+        setTimeout(() => {
+            const r = "特定施設入居者生活介護（有料老人ホーム・外部サービス利用型）" === "バス停留所" ? busRenderer : myRenderer;
+            if (r && r._requestRedraw) r._requestRedraw();
+        }, 50);
+    }
 })
-.catch(e => {});
+.catch(e => { console.error("GeoJSON読込エラー: 特定施設入居者生活介護（有料老人ホーム・外部サービス利用型）", e); });
 
 fetch("geo_22_特定施設入居者生活介護（軽費老人ホーム・外部サービス利用型）.geojson")
 .then(res => res.json())
@@ -1829,7 +2029,7 @@ fetch("geo_22_特定施設入居者生活介護（軽費老人ホーム・外部
             const markerRadius = (shape === 'star') ? 12 : ((shape === 'circle') ? 5 : 8);
 
             return new L.CustomMarker(latlng, {
-                renderer: myRenderer,
+                renderer: ("特定施設入居者生活介護（軽費老人ホーム・外部サービス利用型）" === "バス停留所" ? busRenderer : myRenderer),
                 shape: shape,
                 radius: markerRadius,
                 fillColor: color,
@@ -1854,8 +2054,17 @@ fetch("geo_22_特定施設入居者生活介護（軽費老人ホーム・外部
             });
         }
     });
+    // データ取得完了後に、チェックボックスがONなら確実に元地図へ追加する。
+    const busOrFacilityCb = document.querySelector(`.${label === "バス停留所" ? "bus-toggle" : "facility-toggle"}[value="${label}"]`);
+    if (busOrFacilityCb && busOrFacilityCb.checked) {
+        facilityLayers["特定施設入居者生活介護（軽費老人ホーム・外部サービス利用型）"].addTo(map);
+        setTimeout(() => {
+            const r = "特定施設入居者生活介護（軽費老人ホーム・外部サービス利用型）" === "バス停留所" ? busRenderer : myRenderer;
+            if (r && r._requestRedraw) r._requestRedraw();
+        }, 50);
+    }
 })
-.catch(e => {});
+.catch(e => { console.error("GeoJSON読込エラー: 特定施設入居者生活介護（軽費老人ホーム・外部サービス利用型）", e); });
 
 fetch("geo_22_特定施設入居者生活介護（サービス付き高齢者向け住宅・外部サービス利用型）.geojson")
 .then(res => res.json())
@@ -1867,7 +2076,7 @@ fetch("geo_22_特定施設入居者生活介護（サービス付き高齢者向
             const markerRadius = (shape === 'star') ? 12 : ((shape === 'circle') ? 5 : 8);
 
             return new L.CustomMarker(latlng, {
-                renderer: myRenderer,
+                renderer: ("特定施設入居者生活介護（サービス付き高齢者向け住宅・外部サービス利用型）" === "バス停留所" ? busRenderer : myRenderer),
                 shape: shape,
                 radius: markerRadius,
                 fillColor: color,
@@ -1892,8 +2101,17 @@ fetch("geo_22_特定施設入居者生活介護（サービス付き高齢者向
             });
         }
     });
+    // データ取得完了後に、チェックボックスがONなら確実に元地図へ追加する。
+    const busOrFacilityCb = document.querySelector(`.${label === "バス停留所" ? "bus-toggle" : "facility-toggle"}[value="${label}"]`);
+    if (busOrFacilityCb && busOrFacilityCb.checked) {
+        facilityLayers["特定施設入居者生活介護（サービス付き高齢者向け住宅・外部サービス利用型）"].addTo(map);
+        setTimeout(() => {
+            const r = "特定施設入居者生活介護（サービス付き高齢者向け住宅・外部サービス利用型）" === "バス停留所" ? busRenderer : myRenderer;
+            if (r && r._requestRedraw) r._requestRedraw();
+        }, 50);
+    }
 })
-.catch(e => {});
+.catch(e => { console.error("GeoJSON読込エラー: 特定施設入居者生活介護（サービス付き高齢者向け住宅・外部サービス利用型）", e); });
 
 fetch("geo_22_地域密着型特定施設入居者生活介護（有料老人ホーム）.geojson")
 .then(res => res.json())
@@ -1905,7 +2123,7 @@ fetch("geo_22_地域密着型特定施設入居者生活介護（有料老人ホ
             const markerRadius = (shape === 'star') ? 12 : ((shape === 'circle') ? 5 : 8);
 
             return new L.CustomMarker(latlng, {
-                renderer: myRenderer,
+                renderer: ("地域密着型特定施設入居者生活介護（有料老人ホーム）" === "バス停留所" ? busRenderer : myRenderer),
                 shape: shape,
                 radius: markerRadius,
                 fillColor: color,
@@ -1930,8 +2148,17 @@ fetch("geo_22_地域密着型特定施設入居者生活介護（有料老人ホ
             });
         }
     });
+    // データ取得完了後に、チェックボックスがONなら確実に元地図へ追加する。
+    const busOrFacilityCb = document.querySelector(`.${label === "バス停留所" ? "bus-toggle" : "facility-toggle"}[value="${label}"]`);
+    if (busOrFacilityCb && busOrFacilityCb.checked) {
+        facilityLayers["地域密着型特定施設入居者生活介護（有料老人ホーム）"].addTo(map);
+        setTimeout(() => {
+            const r = "地域密着型特定施設入居者生活介護（有料老人ホーム）" === "バス停留所" ? busRenderer : myRenderer;
+            if (r && r._requestRedraw) r._requestRedraw();
+        }, 50);
+    }
 })
-.catch(e => {});
+.catch(e => { console.error("GeoJSON読込エラー: 地域密着型特定施設入居者生活介護（有料老人ホーム）", e); });
 
 fetch("geo_22_地域密着型特定施設入居者生活介護（軽費老人ホーム）.geojson")
 .then(res => res.json())
@@ -1943,7 +2170,7 @@ fetch("geo_22_地域密着型特定施設入居者生活介護（軽費老人ホ
             const markerRadius = (shape === 'star') ? 12 : ((shape === 'circle') ? 5 : 8);
 
             return new L.CustomMarker(latlng, {
-                renderer: myRenderer,
+                renderer: ("地域密着型特定施設入居者生活介護（軽費老人ホーム）" === "バス停留所" ? busRenderer : myRenderer),
                 shape: shape,
                 radius: markerRadius,
                 fillColor: color,
@@ -1968,8 +2195,17 @@ fetch("geo_22_地域密着型特定施設入居者生活介護（軽費老人ホ
             });
         }
     });
+    // データ取得完了後に、チェックボックスがONなら確実に元地図へ追加する。
+    const busOrFacilityCb = document.querySelector(`.${label === "バス停留所" ? "bus-toggle" : "facility-toggle"}[value="${label}"]`);
+    if (busOrFacilityCb && busOrFacilityCb.checked) {
+        facilityLayers["地域密着型特定施設入居者生活介護（軽費老人ホーム）"].addTo(map);
+        setTimeout(() => {
+            const r = "地域密着型特定施設入居者生活介護（軽費老人ホーム）" === "バス停留所" ? busRenderer : myRenderer;
+            if (r && r._requestRedraw) r._requestRedraw();
+        }, 50);
+    }
 })
-.catch(e => {});
+.catch(e => { console.error("GeoJSON読込エラー: 地域密着型特定施設入居者生活介護（軽費老人ホーム）", e); });
 
 fetch("geo_22_地域密着型特定施設入居者生活介護（サービス付き高齢者向け住宅）.geojson")
 .then(res => res.json())
@@ -1981,7 +2217,7 @@ fetch("geo_22_地域密着型特定施設入居者生活介護（サービス付
             const markerRadius = (shape === 'star') ? 12 : ((shape === 'circle') ? 5 : 8);
 
             return new L.CustomMarker(latlng, {
-                renderer: myRenderer,
+                renderer: ("地域密着型特定施設入居者生活介護（サービス付き高齢者向け住宅）" === "バス停留所" ? busRenderer : myRenderer),
                 shape: shape,
                 radius: markerRadius,
                 fillColor: color,
@@ -2006,8 +2242,17 @@ fetch("geo_22_地域密着型特定施設入居者生活介護（サービス付
             });
         }
     });
+    // データ取得完了後に、チェックボックスがONなら確実に元地図へ追加する。
+    const busOrFacilityCb = document.querySelector(`.${label === "バス停留所" ? "bus-toggle" : "facility-toggle"}[value="${label}"]`);
+    if (busOrFacilityCb && busOrFacilityCb.checked) {
+        facilityLayers["地域密着型特定施設入居者生活介護（サービス付き高齢者向け住宅）"].addTo(map);
+        setTimeout(() => {
+            const r = "地域密着型特定施設入居者生活介護（サービス付き高齢者向け住宅）" === "バス停留所" ? busRenderer : myRenderer;
+            if (r && r._requestRedraw) r._requestRedraw();
+        }, 50);
+    }
 })
-.catch(e => {});
+.catch(e => { console.error("GeoJSON読込エラー: 地域密着型特定施設入居者生活介護（サービス付き高齢者向け住宅）", e); });
 
 fetch("geo_22_特定福祉用具販売.geojson")
 .then(res => res.json())
@@ -2019,7 +2264,7 @@ fetch("geo_22_特定福祉用具販売.geojson")
             const markerRadius = (shape === 'star') ? 12 : ((shape === 'circle') ? 5 : 8);
 
             return new L.CustomMarker(latlng, {
-                renderer: myRenderer,
+                renderer: ("特定福祉用具販売" === "バス停留所" ? busRenderer : myRenderer),
                 shape: shape,
                 radius: markerRadius,
                 fillColor: color,
@@ -2044,8 +2289,17 @@ fetch("geo_22_特定福祉用具販売.geojson")
             });
         }
     });
+    // データ取得完了後に、チェックボックスがONなら確実に元地図へ追加する。
+    const busOrFacilityCb = document.querySelector(`.${label === "バス停留所" ? "bus-toggle" : "facility-toggle"}[value="${label}"]`);
+    if (busOrFacilityCb && busOrFacilityCb.checked) {
+        facilityLayers["特定福祉用具販売"].addTo(map);
+        setTimeout(() => {
+            const r = "特定福祉用具販売" === "バス停留所" ? busRenderer : myRenderer;
+            if (r && r._requestRedraw) r._requestRedraw();
+        }, 50);
+    }
 })
-.catch(e => {});
+.catch(e => { console.error("GeoJSON読込エラー: 特定福祉用具販売", e); });
 
 fetch("geo_22_居宅介護支援.geojson")
 .then(res => res.json())
@@ -2057,7 +2311,7 @@ fetch("geo_22_居宅介護支援.geojson")
             const markerRadius = (shape === 'star') ? 12 : ((shape === 'circle') ? 5 : 8);
 
             return new L.CustomMarker(latlng, {
-                renderer: myRenderer,
+                renderer: ("居宅介護支援" === "バス停留所" ? busRenderer : myRenderer),
                 shape: shape,
                 radius: markerRadius,
                 fillColor: color,
@@ -2082,8 +2336,17 @@ fetch("geo_22_居宅介護支援.geojson")
             });
         }
     });
+    // データ取得完了後に、チェックボックスがONなら確実に元地図へ追加する。
+    const busOrFacilityCb = document.querySelector(`.${label === "バス停留所" ? "bus-toggle" : "facility-toggle"}[value="${label}"]`);
+    if (busOrFacilityCb && busOrFacilityCb.checked) {
+        facilityLayers["居宅介護支援"].addTo(map);
+        setTimeout(() => {
+            const r = "居宅介護支援" === "バス停留所" ? busRenderer : myRenderer;
+            if (r && r._requestRedraw) r._requestRedraw();
+        }, 50);
+    }
 })
-.catch(e => {});
+.catch(e => { console.error("GeoJSON読込エラー: 居宅介護支援", e); });
 
 fetch("geo_22_介護老人福祉施設.geojson")
 .then(res => res.json())
@@ -2095,7 +2358,7 @@ fetch("geo_22_介護老人福祉施設.geojson")
             const markerRadius = (shape === 'star') ? 12 : ((shape === 'circle') ? 5 : 8);
 
             return new L.CustomMarker(latlng, {
-                renderer: myRenderer,
+                renderer: ("介護老人福祉施設" === "バス停留所" ? busRenderer : myRenderer),
                 shape: shape,
                 radius: markerRadius,
                 fillColor: color,
@@ -2120,8 +2383,17 @@ fetch("geo_22_介護老人福祉施設.geojson")
             });
         }
     });
+    // データ取得完了後に、チェックボックスがONなら確実に元地図へ追加する。
+    const busOrFacilityCb = document.querySelector(`.${label === "バス停留所" ? "bus-toggle" : "facility-toggle"}[value="${label}"]`);
+    if (busOrFacilityCb && busOrFacilityCb.checked) {
+        facilityLayers["介護老人福祉施設"].addTo(map);
+        setTimeout(() => {
+            const r = "介護老人福祉施設" === "バス停留所" ? busRenderer : myRenderer;
+            if (r && r._requestRedraw) r._requestRedraw();
+        }, 50);
+    }
 })
-.catch(e => {});
+.catch(e => { console.error("GeoJSON読込エラー: 介護老人福祉施設", e); });
 
 fetch("geo_22_介護老人保健施設.geojson")
 .then(res => res.json())
@@ -2133,7 +2405,7 @@ fetch("geo_22_介護老人保健施設.geojson")
             const markerRadius = (shape === 'star') ? 12 : ((shape === 'circle') ? 5 : 8);
 
             return new L.CustomMarker(latlng, {
-                renderer: myRenderer,
+                renderer: ("介護老人保健施設" === "バス停留所" ? busRenderer : myRenderer),
                 shape: shape,
                 radius: markerRadius,
                 fillColor: color,
@@ -2158,8 +2430,17 @@ fetch("geo_22_介護老人保健施設.geojson")
             });
         }
     });
+    // データ取得完了後に、チェックボックスがONなら確実に元地図へ追加する。
+    const busOrFacilityCb = document.querySelector(`.${label === "バス停留所" ? "bus-toggle" : "facility-toggle"}[value="${label}"]`);
+    if (busOrFacilityCb && busOrFacilityCb.checked) {
+        facilityLayers["介護老人保健施設"].addTo(map);
+        setTimeout(() => {
+            const r = "介護老人保健施設" === "バス停留所" ? busRenderer : myRenderer;
+            if (r && r._requestRedraw) r._requestRedraw();
+        }, 50);
+    }
 })
-.catch(e => {});
+.catch(e => { console.error("GeoJSON読込エラー: 介護老人保健施設", e); });
 
 fetch("geo_22_介護療養型医療施設.geojson")
 .then(res => res.json())
@@ -2171,7 +2452,7 @@ fetch("geo_22_介護療養型医療施設.geojson")
             const markerRadius = (shape === 'star') ? 12 : ((shape === 'circle') ? 5 : 8);
 
             return new L.CustomMarker(latlng, {
-                renderer: myRenderer,
+                renderer: ("介護療養型医療施設" === "バス停留所" ? busRenderer : myRenderer),
                 shape: shape,
                 radius: markerRadius,
                 fillColor: color,
@@ -2196,8 +2477,17 @@ fetch("geo_22_介護療養型医療施設.geojson")
             });
         }
     });
+    // データ取得完了後に、チェックボックスがONなら確実に元地図へ追加する。
+    const busOrFacilityCb = document.querySelector(`.${label === "バス停留所" ? "bus-toggle" : "facility-toggle"}[value="${label}"]`);
+    if (busOrFacilityCb && busOrFacilityCb.checked) {
+        facilityLayers["介護療養型医療施設"].addTo(map);
+        setTimeout(() => {
+            const r = "介護療養型医療施設" === "バス停留所" ? busRenderer : myRenderer;
+            if (r && r._requestRedraw) r._requestRedraw();
+        }, 50);
+    }
 })
-.catch(e => {});
+.catch(e => { console.error("GeoJSON読込エラー: 介護療養型医療施設", e); });
 
 fetch("geo_22_地域密着型介護老人福祉施設入所者生活介護.geojson")
 .then(res => res.json())
@@ -2209,7 +2499,7 @@ fetch("geo_22_地域密着型介護老人福祉施設入所者生活介護.geojs
             const markerRadius = (shape === 'star') ? 12 : ((shape === 'circle') ? 5 : 8);
 
             return new L.CustomMarker(latlng, {
-                renderer: myRenderer,
+                renderer: ("地域密着型介護老人福祉施設入所者生活介護" === "バス停留所" ? busRenderer : myRenderer),
                 shape: shape,
                 radius: markerRadius,
                 fillColor: color,
@@ -2234,8 +2524,17 @@ fetch("geo_22_地域密着型介護老人福祉施設入所者生活介護.geojs
             });
         }
     });
+    // データ取得完了後に、チェックボックスがONなら確実に元地図へ追加する。
+    const busOrFacilityCb = document.querySelector(`.${label === "バス停留所" ? "bus-toggle" : "facility-toggle"}[value="${label}"]`);
+    if (busOrFacilityCb && busOrFacilityCb.checked) {
+        facilityLayers["地域密着型介護老人福祉施設入所者生活介護"].addTo(map);
+        setTimeout(() => {
+            const r = "地域密着型介護老人福祉施設入所者生活介護" === "バス停留所" ? busRenderer : myRenderer;
+            if (r && r._requestRedraw) r._requestRedraw();
+        }, 50);
+    }
 })
-.catch(e => {});
+.catch(e => { console.error("GeoJSON読込エラー: 地域密着型介護老人福祉施設入所者生活介護", e); });
 
 fetch("geo_22_介護医療院.geojson")
 .then(res => res.json())
@@ -2247,7 +2546,7 @@ fetch("geo_22_介護医療院.geojson")
             const markerRadius = (shape === 'star') ? 12 : ((shape === 'circle') ? 5 : 8);
 
             return new L.CustomMarker(latlng, {
-                renderer: myRenderer,
+                renderer: ("介護医療院" === "バス停留所" ? busRenderer : myRenderer),
                 shape: shape,
                 radius: markerRadius,
                 fillColor: color,
@@ -2272,8 +2571,17 @@ fetch("geo_22_介護医療院.geojson")
             });
         }
     });
+    // データ取得完了後に、チェックボックスがONなら確実に元地図へ追加する。
+    const busOrFacilityCb = document.querySelector(`.${label === "バス停留所" ? "bus-toggle" : "facility-toggle"}[value="${label}"]`);
+    if (busOrFacilityCb && busOrFacilityCb.checked) {
+        facilityLayers["介護医療院"].addTo(map);
+        setTimeout(() => {
+            const r = "介護医療院" === "バス停留所" ? busRenderer : myRenderer;
+            if (r && r._requestRedraw) r._requestRedraw();
+        }, 50);
+    }
 })
-.catch(e => {});
+.catch(e => { console.error("GeoJSON読込エラー: 介護医療院", e); });
 
 fetch("geo_22_夜間対応型訪問介護.geojson")
 .then(res => res.json())
@@ -2285,7 +2593,7 @@ fetch("geo_22_夜間対応型訪問介護.geojson")
             const markerRadius = (shape === 'star') ? 12 : ((shape === 'circle') ? 5 : 8);
 
             return new L.CustomMarker(latlng, {
-                renderer: myRenderer,
+                renderer: ("夜間対応型訪問介護" === "バス停留所" ? busRenderer : myRenderer),
                 shape: shape,
                 radius: markerRadius,
                 fillColor: color,
@@ -2310,8 +2618,17 @@ fetch("geo_22_夜間対応型訪問介護.geojson")
             });
         }
     });
+    // データ取得完了後に、チェックボックスがONなら確実に元地図へ追加する。
+    const busOrFacilityCb = document.querySelector(`.${label === "バス停留所" ? "bus-toggle" : "facility-toggle"}[value="${label}"]`);
+    if (busOrFacilityCb && busOrFacilityCb.checked) {
+        facilityLayers["夜間対応型訪問介護"].addTo(map);
+        setTimeout(() => {
+            const r = "夜間対応型訪問介護" === "バス停留所" ? busRenderer : myRenderer;
+            if (r && r._requestRedraw) r._requestRedraw();
+        }, 50);
+    }
 })
-.catch(e => {});
+.catch(e => { console.error("GeoJSON読込エラー: 夜間対応型訪問介護", e); });
 
 fetch("geo_22_認知症対応型通所介護.geojson")
 .then(res => res.json())
@@ -2323,7 +2640,7 @@ fetch("geo_22_認知症対応型通所介護.geojson")
             const markerRadius = (shape === 'star') ? 12 : ((shape === 'circle') ? 5 : 8);
 
             return new L.CustomMarker(latlng, {
-                renderer: myRenderer,
+                renderer: ("認知症対応型通所介護" === "バス停留所" ? busRenderer : myRenderer),
                 shape: shape,
                 radius: markerRadius,
                 fillColor: color,
@@ -2348,8 +2665,17 @@ fetch("geo_22_認知症対応型通所介護.geojson")
             });
         }
     });
+    // データ取得完了後に、チェックボックスがONなら確実に元地図へ追加する。
+    const busOrFacilityCb = document.querySelector(`.${label === "バス停留所" ? "bus-toggle" : "facility-toggle"}[value="${label}"]`);
+    if (busOrFacilityCb && busOrFacilityCb.checked) {
+        facilityLayers["認知症対応型通所介護"].addTo(map);
+        setTimeout(() => {
+            const r = "認知症対応型通所介護" === "バス停留所" ? busRenderer : myRenderer;
+            if (r && r._requestRedraw) r._requestRedraw();
+        }, 50);
+    }
 })
-.catch(e => {});
+.catch(e => { console.error("GeoJSON読込エラー: 認知症対応型通所介護", e); });
 
 fetch("geo_22_小規模多機能型居宅介護.geojson")
 .then(res => res.json())
@@ -2361,7 +2687,7 @@ fetch("geo_22_小規模多機能型居宅介護.geojson")
             const markerRadius = (shape === 'star') ? 12 : ((shape === 'circle') ? 5 : 8);
 
             return new L.CustomMarker(latlng, {
-                renderer: myRenderer,
+                renderer: ("小規模多機能型居宅介護" === "バス停留所" ? busRenderer : myRenderer),
                 shape: shape,
                 radius: markerRadius,
                 fillColor: color,
@@ -2386,8 +2712,17 @@ fetch("geo_22_小規模多機能型居宅介護.geojson")
             });
         }
     });
+    // データ取得完了後に、チェックボックスがONなら確実に元地図へ追加する。
+    const busOrFacilityCb = document.querySelector(`.${label === "バス停留所" ? "bus-toggle" : "facility-toggle"}[value="${label}"]`);
+    if (busOrFacilityCb && busOrFacilityCb.checked) {
+        facilityLayers["小規模多機能型居宅介護"].addTo(map);
+        setTimeout(() => {
+            const r = "小規模多機能型居宅介護" === "バス停留所" ? busRenderer : myRenderer;
+            if (r && r._requestRedraw) r._requestRedraw();
+        }, 50);
+    }
 })
-.catch(e => {});
+.catch(e => { console.error("GeoJSON読込エラー: 小規模多機能型居宅介護", e); });
 
 fetch("geo_22_定期巡回・随時対応型訪問介護看護.geojson")
 .then(res => res.json())
@@ -2399,7 +2734,7 @@ fetch("geo_22_定期巡回・随時対応型訪問介護看護.geojson")
             const markerRadius = (shape === 'star') ? 12 : ((shape === 'circle') ? 5 : 8);
 
             return new L.CustomMarker(latlng, {
-                renderer: myRenderer,
+                renderer: ("定期巡回・随時対応型訪問介護看護" === "バス停留所" ? busRenderer : myRenderer),
                 shape: shape,
                 radius: markerRadius,
                 fillColor: color,
@@ -2424,8 +2759,17 @@ fetch("geo_22_定期巡回・随時対応型訪問介護看護.geojson")
             });
         }
     });
+    // データ取得完了後に、チェックボックスがONなら確実に元地図へ追加する。
+    const busOrFacilityCb = document.querySelector(`.${label === "バス停留所" ? "bus-toggle" : "facility-toggle"}[value="${label}"]`);
+    if (busOrFacilityCb && busOrFacilityCb.checked) {
+        facilityLayers["定期巡回・随時対応型訪問介護看護"].addTo(map);
+        setTimeout(() => {
+            const r = "定期巡回・随時対応型訪問介護看護" === "バス停留所" ? busRenderer : myRenderer;
+            if (r && r._requestRedraw) r._requestRedraw();
+        }, 50);
+    }
 })
-.catch(e => {});
+.catch(e => { console.error("GeoJSON読込エラー: 定期巡回・随時対応型訪問介護看護", e); });
 
 fetch("geo_22_看護小規模多機能型居宅介護.geojson")
 .then(res => res.json())
@@ -2437,7 +2781,7 @@ fetch("geo_22_看護小規模多機能型居宅介護.geojson")
             const markerRadius = (shape === 'star') ? 12 : ((shape === 'circle') ? 5 : 8);
 
             return new L.CustomMarker(latlng, {
-                renderer: myRenderer,
+                renderer: ("看護小規模多機能型居宅介護" === "バス停留所" ? busRenderer : myRenderer),
                 shape: shape,
                 radius: markerRadius,
                 fillColor: color,
@@ -2462,8 +2806,17 @@ fetch("geo_22_看護小規模多機能型居宅介護.geojson")
             });
         }
     });
+    // データ取得完了後に、チェックボックスがONなら確実に元地図へ追加する。
+    const busOrFacilityCb = document.querySelector(`.${label === "バス停留所" ? "bus-toggle" : "facility-toggle"}[value="${label}"]`);
+    if (busOrFacilityCb && busOrFacilityCb.checked) {
+        facilityLayers["看護小規模多機能型居宅介護"].addTo(map);
+        setTimeout(() => {
+            const r = "看護小規模多機能型居宅介護" === "バス停留所" ? busRenderer : myRenderer;
+            if (r && r._requestRedraw) r._requestRedraw();
+        }, 50);
+    }
 })
-.catch(e => {});
+.catch(e => { console.error("GeoJSON読込エラー: 看護小規模多機能型居宅介護", e); });
 
 fetch("geo_22_地域密着型通所介護.geojson")
 .then(res => res.json())
@@ -2475,7 +2828,7 @@ fetch("geo_22_地域密着型通所介護.geojson")
             const markerRadius = (shape === 'star') ? 12 : ((shape === 'circle') ? 5 : 8);
 
             return new L.CustomMarker(latlng, {
-                renderer: myRenderer,
+                renderer: ("地域密着型通所介護" === "バス停留所" ? busRenderer : myRenderer),
                 shape: shape,
                 radius: markerRadius,
                 fillColor: color,
@@ -2500,8 +2853,17 @@ fetch("geo_22_地域密着型通所介護.geojson")
             });
         }
     });
+    // データ取得完了後に、チェックボックスがONなら確実に元地図へ追加する。
+    const busOrFacilityCb = document.querySelector(`.${label === "バス停留所" ? "bus-toggle" : "facility-toggle"}[value="${label}"]`);
+    if (busOrFacilityCb && busOrFacilityCb.checked) {
+        facilityLayers["地域密着型通所介護"].addTo(map);
+        setTimeout(() => {
+            const r = "地域密着型通所介護" === "バス停留所" ? busRenderer : myRenderer;
+            if (r && r._requestRedraw) r._requestRedraw();
+        }, 50);
+    }
 })
-.catch(e => {});
+.catch(e => { console.error("GeoJSON読込エラー: 地域密着型通所介護", e); });
 
 fetch("geo_22_バス停留所.geojson")
 .then(res => res.json())
@@ -2513,7 +2875,7 @@ fetch("geo_22_バス停留所.geojson")
             const markerRadius = (shape === 'star') ? 12 : ((shape === 'circle') ? 5 : 8);
 
             return new L.CustomMarker(latlng, {
-                renderer: myRenderer,
+                renderer: ("バス停留所" === "バス停留所" ? busRenderer : myRenderer),
                 shape: shape,
                 radius: markerRadius,
                 fillColor: color,
@@ -2538,8 +2900,17 @@ fetch("geo_22_バス停留所.geojson")
             });
         }
     });
+    // データ取得完了後に、チェックボックスがONなら確実に元地図へ追加する。
+    const busOrFacilityCb = document.querySelector(`.${label === "バス停留所" ? "bus-toggle" : "facility-toggle"}[value="${label}"]`);
+    if (busOrFacilityCb && busOrFacilityCb.checked) {
+        facilityLayers["バス停留所"].addTo(map);
+        setTimeout(() => {
+            const r = "バス停留所" === "バス停留所" ? busRenderer : myRenderer;
+            if (r && r._requestRedraw) r._requestRedraw();
+        }, 50);
+    }
 })
-.catch(e => {});
+.catch(e => { console.error("GeoJSON読込エラー: バス停留所", e); });
 
     ['controls', 'search-panel', 'route-panel', 'text-config-panel', 'info-panel', 'hazard-legend'].forEach(id => {
         const el = document.getElementById(id);
