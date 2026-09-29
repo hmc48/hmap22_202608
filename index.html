@@ -149,7 +149,7 @@ input[type="checkbox"], input[type="radio"] { margin-right: 10px; transform: sca
 button.menu-sub-btn { flex: 1; padding: 8px; font-size: 11px; cursor: pointer; }
 .search-item:hover { background:#f0f0f0; cursor:pointer; }
 .leaflet-top.leaflet-right {
-  margin-top: 275px;
+  margin-top: 310px;
 }
 .leaflet-overlay-pane {
   z-index: 400 !important;
@@ -698,7 +698,7 @@ button.menu-sub-btn { flex: 1; padding: 8px; font-size: 11px; cursor: pointer; }
       options: { position: 'topright' },
       onAdd: function() {
         const container = L.DomUtil.create('div', 'leaflet-bar');
-        container.style.marginTop = '1px';
+        container.style.marginTop = '10px';
         
         const textBtn = L.DomUtil.create('a', 'pm-text-btn', container);
         textBtn.innerHTML = 'Ｔ';
@@ -722,22 +722,27 @@ button.menu-sub-btn { flex: 1; padding: 8px; font-size: 11px; cursor: pointer; }
           btn.style.borderBottom = `10px solid ${currentSelectedColor}`;
         };
 
-        const imgBtn = L.DomUtil.create('a', 'pm-image-btn', container);
+        // 配置済み画像操作アイコン用の2列（横並び）コンテナ
+        const imgRowContainer = L.DomUtil.create('div', '', container);
+        imgRowContainer.style.cssText = "display: flex; border-top: 1px solid #ccc;";
+
+        const imgBtn = L.DomUtil.create('a', 'pm-image-btn', imgRowContainer);
         imgBtn.innerHTML = '🖼️';
         imgBtn.title = "画像の追加・編集";
-        imgBtn.style.cssText = "cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:18px;";
+        imgBtn.style.cssText = "cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:18px; flex: 1; border-right: 1px solid #ccc; height: 30px;";
         imgBtn.onclick = (e) => { e.preventDefault(); toggleImageMode(); };
 
-        const selBtn = L.DomUtil.create('a', 'pm-select-btn', container);
+        const selBtn = L.DomUtil.create('a', 'pm-select-btn', imgRowContainer);
         selBtn.innerHTML = '👆';
         selBtn.title = "配置済み画像を選択";
-        selBtn.style.cssText = "cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:18px;";
+        selBtn.style.cssText = "cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:18px; flex: 1; height: 30px;";
         selBtn.onclick = (e) => { e.preventDefault(); startImageSelectionMode(); };
 
         L.DomEvent.disableClickPropagation(container);
         return container;
       }
     });
+
     const customControl = new CustomActionControl();
     map.addControl(customControl);
     map.removeControl(customControl);
