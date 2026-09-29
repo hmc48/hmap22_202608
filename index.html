@@ -3201,9 +3201,20 @@ fetch("geo_22_バス停留所.geojson")
     }
 
     function closePrintPreview() {
-        document.getElementById('print-preview').style.display='none';
+        // 印刷画面を閉じて元の地図へ戻る際は、
+        // 「① 印刷範囲を表示」で出した赤い境界線も必ず消す。
+        const preview = document.getElementById('print-preview');
+        if (preview) preview.style.display='none';
+
         printPreviewMaps.forEach(m=>{try{m.remove();}catch(e){}});
         printPreviewMaps=[];
+
+        // 元の地図を通常表示へ戻す。
+        closePrintGrid();
+
+        // 印刷パネルも閉じて、元の地図をそのまま操作できる状態にする。
+        const panel = document.getElementById('print-panel');
+        if (panel) panel.style.display='none';
     }
 
 </script>
