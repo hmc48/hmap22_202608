@@ -762,14 +762,24 @@ button.menu-sub-btn { flex: 1; padding: 8px; font-size: 11px; cursor: pointer; }
         const size = document.getElementById('custom-text-size').value;
         const family = document.getElementById('custom-text-family').value;
         
-        const textIcon = L.divIcon({
-          html: `<div style="color:${currentSelectedColor}; font-size:${size}px; font-family:${family}; white-space:nowrap; font-weight:bold; transform: translate(-50%, -50%); text-align: center;">${text}</div>`,
-          className: 'custom-text-marker',
-          iconSize: [0, 0], iconAnchor: [0, 0] 
-        });
+        const marker = L.marker(e.latlng, {
+          icon: L.divIcon({
+            html: `<div style="color:${currentSelectedColor}; font-size:${Number(size)}px; font-family:${family}; white-space:nowrap; font-weight:bold; transform:translate(-50%, -50%); text-align:center;">${text}</div>`,
+            className: 'custom-text-marker',
+            iconSize: [0, 0],
+            iconAnchor: [0, 0]
+          })
+        }).addTo(map);
 
-        const marker = L.marker(e.latlng, { icon: textIcon }).addTo(map);
-        marker.pm.enable(); 
+        marker._mapTextData = {
+          text: text,
+          baseSize: Number(size),
+          family: family,
+          color: currentSelectedColor
+        };
+
+        updateTextMarkerScale(marker);
+        marker.pm.enable();
       } else {
         closeControlsPanel();
       }
@@ -846,9 +856,54 @@ button.menu-sub-btn { flex: 1; padding: 8px; font-size: 11px; cursor: pointer; }
     map.addControl(customControl);
     map.removeControl(customControl);
 
+    // ==========================================================
+    // 地図Zoom連動：テキスト・挿入画像
+    // ==========================================================
+    const CUSTOM_OVERLAY_BASE_ZOOM = 15;
+
+    function getCustomOverlayZoomScale() {
+        return Math.pow(2, map.getZoom() - CUSTOM_OVERLAY_BASE_ZOOM);
+    }
+
+    function updateTextMarkerScale(marker) {
+        if (!marker || !marker._mapTextData) return;
+        const data = marker._mapTextData;
+        const scale = getCustomOverlayZoomScale();
+        const fontSize = Math.max(1, data.baseSize * scale);
+
+        marker.setIcon(L.divIcon({
+            html: `<div style="color:${data.color}; font-size:${fontSize}px; font-family:${data.family}; white-space:nowrap; font-weight:bold; transform:translate(-50%, -50%); text-align:center;">${data.text}</div>`,
+            className: 'custom-text-marker',
+            iconSize: [0, 0],
+            iconAnchor: [0, 0]
+        }));
+    }
+
+    function updateImageMarkerScale(marker) {
+        if (!marker || !marker._mapImageData) return;
+        const data = marker._mapImageData;
+        const zoomScale = getCustomOverlayZoomScale();
+        const displayWidth = Math.max(1, data.baseWidth * zoomScale * data.userScale);
+
+        marker.setIcon(L.divIcon({
+            html: `<img src="${data.url}" style="width:${displayWidth}px; height:auto; display:block; transform:rotate(${data.rotation}deg); transform-origin:center center;" class="map-added-image">`,
+            className: 'image-marker-container',
+            iconSize: [displayWidth, displayWidth],
+            iconAnchor: [displayWidth / 2, displayWidth / 2]
+        }));
+    }
+
+    function updateCustomOverlayScales() {
+        map.eachLayer(layer => {
+            if (layer._mapTextData) updateTextMarkerScale(layer);
+            if (layer._mapImageData) updateImageMarkerScale(layer);
+        });
+    }
+
     function updateZoomIndicator() {
         const zoom = map.getZoom();
         document.getElementById('zoom-indicator').innerText = `Zoom: ${zoom.toFixed(1)}`;
+        updateCustomOverlayScales();
     }
     updateZoomIndicator();
     map.on('zoom', updateZoomIndicator);
@@ -2880,39 +2935,52 @@ fetch("geo_22_バス停留所.geojson")
     function addImageToMap(url) {
         const container = map.getContainer();
         const width = container.offsetWidth;
-        const targetPoint = L.point(width - 250, 100); 
-        const targetLatLng = map.containerPointToLayerPoint(targetPoint);
-        const coords = map.layerPointToLatLng(targetLatLng);
-
-        const icon = L.divIcon({
-            html: `<img src="${url}" style="width:100px; transform: rotate(0deg) scale(1.0);" class="map-added-image">`,
-            className: 'image-marker-container',
-            iconSize: [100, 100],
-            iconAnchor: [50, 50]
-        });
+        const targetPoint = L.point(width - 250, 100);
+        const coords = map.containerPointToLatLng(targetPoint);
 
         const marker = L.marker(coords, { draggable: true }).addTo(map);
-        marker.setIcon(icon);
+
+        marker._mapImageData = {
+            url: url,
+            baseWidth: 100,
+            userScale: 1.0,
+            rotation: 0
+        };
+
+        updateImageMarkerScale(marker);
         setupImageEdit(marker);
     }
 
     function setupImageEdit(marker) {
-        if (currentImgMarker && currentImgMarker !== marker) finalizeImage(currentImgMarker);
-        currentImgMarker = marker;
-        const imgElement = marker.getElement().querySelector('img');
-        imgElement.classList.add('editing-image');
-        marker.dragging.enable();
-
         document.getElementById('image-config-panel').style.display = 'block';
 
+        if (marker._mapImageData) {
+            document.getElementById('img-rotate').value = marker._mapImageData.rotation;
+            document.getElementById('img-scale').value = marker._mapImageData.userScale;
+            document.getElementById('rot-val').innerText = marker._mapImageData.rotation;
+            document.getElementById('scale-val').innerText = marker._mapImageData.userScale;
+        }
+
         const update = () => {
-            const r = document.getElementById('img-rotate').value;
-            const s = document.getElementById('img-scale').value;
-            imgElement.style.transform = `rotate(${r}deg) scale(${s})`;
+            const r = Number(document.getElementById('img-rotate').value);
+            const s = Number(document.getElementById('img-scale').value);
+
+            if (!marker._mapImageData) {
+                marker._mapImageData = {
+                    url: imgElement ? imgElement.src : '',
+                    baseWidth: 100,
+                    userScale: 1.0,
+                    rotation: 0
+                };
+            }
+
+            marker._mapImageData.rotation = r;
+            marker._mapImageData.userScale = s;
+            updateImageMarkerScale(marker);
+
             document.getElementById('rot-val').innerText = r;
             document.getElementById('scale-val').innerText = s;
         };
-
         document.getElementById('img-rotate').oninput = update;
         document.getElementById('img-scale').oninput = update;
         document.getElementById('btn-img-confirm').onclick = () => finalizeImage(marker);
