@@ -394,6 +394,20 @@ button.menu-sub-btn { flex: 1; padding: 8px; font-size: 11px; cursor: pointer; }
     <div class="section-title">バス停・施設・境界線</div>
 <div class="section-title" style="margin-top:5px; color:#555; font-size:11px;">▼ バス停留所</div>
     <label class="layer-item"><input type="checkbox" class="bus-toggle" value="バス停留所"> バス停留所</label>
+<div class="section-title" style="margin-top:10px; color:#555; font-size:11px;">▼ 学校</div>
+    <label class="layer-item"><input type="checkbox" class="school-toggle" value="小学校"> 小学校</label>
+    <label class="layer-item"><input type="checkbox" class="school-toggle" value="中学校"> 中学校</label>
+    <label class="layer-item"><input type="checkbox" class="school-toggle" value="中等教育学校"> 中等教育学校</label>
+    <label class="layer-item"><input type="checkbox" class="school-toggle" value="高校"> 高校</label>
+    <label class="layer-item"><input type="checkbox" class="school-toggle" value="高等専門学校"> 高等専門学校</label>
+    <label class="layer-item"><input type="checkbox" class="school-toggle" value="短期大学"> 短期大学</label>
+    <label class="layer-item"><input type="checkbox" class="school-toggle" value="大学"> 大学</label>
+    <label class="layer-item"><input type="checkbox" class="school-toggle" value="幼稚園"> 幼稚園</label>
+    <label class="layer-item"><input type="checkbox" class="school-toggle" value="特別支援学校"> 特別支援学校</label>
+    <label class="layer-item"><input type="checkbox" class="school-toggle" value="幼保連携型認定こども園"> 幼保連携型認定こども園</label>
+    <label class="layer-item"><input type="checkbox" class="school-toggle" value="義務教育学校"> 義務教育学校</label>
+    <label class="layer-item"><input type="checkbox" class="school-toggle" value="各種学校"> 各種学校</label>
+    <label class="layer-item"><input type="checkbox" class="school-toggle" value="専修学校"> 専修学校</label>
 <div class="section-title" style="margin-top:10px; color:#555; font-size:11px;">▼ 施設種類</div>
     <label class="layer-item"><input type="checkbox" class="facility-toggle" value="病院"> 病院</label>
     <label class="layer-item"><input type="checkbox" class="facility-toggle" value="診療所"> 診療所</label>
@@ -512,6 +526,10 @@ button.menu-sub-btn { flex: 1; padding: 8px; font-size: 11px; cursor: pointer; }
     <span style="color:red;">■</span>助産院
     <span style="color:brown;">●</span>介護
     <span style="color:orange;">　▲</span>バス停留所<br>
+    <span style="color:green;">★</span>小学校
+    <span style="color:red;">♥</span>中学校
+    <span style="color:blue;">■</span>高校
+    <span style="color:brown;">●</span>中等教育学校・高等専門学校・短期大学・大学・幼稚園・特別支援学校・幼保連携型認定こども園・義務教育学校・各種学校・専修学校<br>
     【出典】<br>
     医療情報ネットのオープンデータ（厚生労働省）
     (2026年6月1日時点) <br>
@@ -555,7 +573,7 @@ button.menu-sub-btn { flex: 1; padding: 8px; font-size: 11px; cursor: pointer; }
   <script src="https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.min.js"></script>
   <script>
     const colorMap = {"赤": "red", "青": "blue", "オレンジ": "orange", "緑": "green", "茶": "brown", "黄": "yellow"};
-    const shapeMap = {"病院": "star", "診療所": "heart", "歯科": "club", "助産院": "square", "薬局": "spade", "バス停留所": "triangle"};
+    const shapeMap = {"病院": "star", "診療所": "heart", "歯科": "club", "助産院": "square", "薬局": "spade", "バス停留所": "triangle", "小学校": "star", "中学校": "heart", "高校": "square", "中等教育学校": "circle", "高等専門学校": "circle", "短期大学": "circle", "大学": "circle", "幼稚園": "circle", "特別支援学校": "circle", "幼保連携型認定こども園": "circle", "義務教育学校": "circle", "各種学校": "circle", "専修学校": "circle"};
 
     const myRenderer = L.canvas({ padding: 0.5 });
 
@@ -2701,6 +2719,357 @@ fetch("geo_22_バス停留所.geojson")
 })
 .catch(e => {});
 
+fetch("geo_22_小学校.geojson")
+.then(res => res.json())
+.then(data => {
+    facilityLayers["小学校"] = L.geoJSON(data, {
+        pointToLayer: (f, latlng) => {
+            const shape = shapeMap["小学校"] || "circle";
+            const color = colorMap["緑"] || "blue";
+            const markerRadius = (shape === 'star') ? 12 : 8;
+            return new L.CustomMarker(latlng, {
+                renderer: myRenderer, shape: shape, radius: markerRadius,
+                fillColor: color, color: "white", weight: 1, fillOpacity: 0.9
+            }).bindPopup(`<strong>${f.properties["内容"] || "-"}</strong>`, { maxWidth: 260 });
+        },
+        onEachFeature: (f, l) => {
+            l.on('click', () => {
+                map.pm.disableDraw();
+                toggleTextMode(false);
+                if ('ontouchstart' in window) {
+                    document.getElementById('search-panel').style.display = 'none';
+                    document.getElementById('search-input').blur();
+                }
+            });
+        }
+    });
+})
+.catch(e => console.error("学校データ読込エラー: 小学校", e));
+
+fetch("geo_22_中学校.geojson")
+.then(res => res.json())
+.then(data => {
+    facilityLayers["中学校"] = L.geoJSON(data, {
+        pointToLayer: (f, latlng) => {
+            const shape = shapeMap["中学校"] || "circle";
+            const color = colorMap["赤"] || "blue";
+            const markerRadius = (shape === 'star') ? 12 : 8;
+            return new L.CustomMarker(latlng, {
+                renderer: myRenderer, shape: shape, radius: markerRadius,
+                fillColor: color, color: "white", weight: 1, fillOpacity: 0.9
+            }).bindPopup(`<strong>${f.properties["内容"] || "-"}</strong>`, { maxWidth: 260 });
+        },
+        onEachFeature: (f, l) => {
+            l.on('click', () => {
+                map.pm.disableDraw();
+                toggleTextMode(false);
+                if ('ontouchstart' in window) {
+                    document.getElementById('search-panel').style.display = 'none';
+                    document.getElementById('search-input').blur();
+                }
+            });
+        }
+    });
+})
+.catch(e => console.error("学校データ読込エラー: 中学校", e));
+
+fetch("geo_22_中等教育学校.geojson")
+.then(res => res.json())
+.then(data => {
+    facilityLayers["中等教育学校"] = L.geoJSON(data, {
+        pointToLayer: (f, latlng) => {
+            const shape = shapeMap["中等教育学校"] || "circle";
+            const color = colorMap["茶"] || "blue";
+            const markerRadius = (shape === 'star') ? 12 : 8;
+            return new L.CustomMarker(latlng, {
+                renderer: myRenderer, shape: shape, radius: markerRadius,
+                fillColor: color, color: "white", weight: 1, fillOpacity: 0.9
+            }).bindPopup(`<strong>${f.properties["内容"] || "-"}</strong>`, { maxWidth: 260 });
+        },
+        onEachFeature: (f, l) => {
+            l.on('click', () => {
+                map.pm.disableDraw();
+                toggleTextMode(false);
+                if ('ontouchstart' in window) {
+                    document.getElementById('search-panel').style.display = 'none';
+                    document.getElementById('search-input').blur();
+                }
+            });
+        }
+    });
+})
+.catch(e => console.error("学校データ読込エラー: 中等教育学校", e));
+
+fetch("geo_22_高校.geojson")
+.then(res => res.json())
+.then(data => {
+    facilityLayers["高校"] = L.geoJSON(data, {
+        pointToLayer: (f, latlng) => {
+            const shape = shapeMap["高校"] || "circle";
+            const color = colorMap["青"] || "blue";
+            const markerRadius = (shape === 'star') ? 12 : 8;
+            return new L.CustomMarker(latlng, {
+                renderer: myRenderer, shape: shape, radius: markerRadius,
+                fillColor: color, color: "white", weight: 1, fillOpacity: 0.9
+            }).bindPopup(`<strong>${f.properties["内容"] || "-"}</strong>`, { maxWidth: 260 });
+        },
+        onEachFeature: (f, l) => {
+            l.on('click', () => {
+                map.pm.disableDraw();
+                toggleTextMode(false);
+                if ('ontouchstart' in window) {
+                    document.getElementById('search-panel').style.display = 'none';
+                    document.getElementById('search-input').blur();
+                }
+            });
+        }
+    });
+})
+.catch(e => console.error("学校データ読込エラー: 高校", e));
+
+fetch("geo_22_高等専門学校.geojson")
+.then(res => res.json())
+.then(data => {
+    facilityLayers["高等専門学校"] = L.geoJSON(data, {
+        pointToLayer: (f, latlng) => {
+            const shape = shapeMap["高等専門学校"] || "circle";
+            const color = colorMap["茶"] || "blue";
+            const markerRadius = (shape === 'star') ? 12 : 8;
+            return new L.CustomMarker(latlng, {
+                renderer: myRenderer, shape: shape, radius: markerRadius,
+                fillColor: color, color: "white", weight: 1, fillOpacity: 0.9
+            }).bindPopup(`<strong>${f.properties["内容"] || "-"}</strong>`, { maxWidth: 260 });
+        },
+        onEachFeature: (f, l) => {
+            l.on('click', () => {
+                map.pm.disableDraw();
+                toggleTextMode(false);
+                if ('ontouchstart' in window) {
+                    document.getElementById('search-panel').style.display = 'none';
+                    document.getElementById('search-input').blur();
+                }
+            });
+        }
+    });
+})
+.catch(e => console.error("学校データ読込エラー: 高等専門学校", e));
+
+fetch("geo_22_短期大学.geojson")
+.then(res => res.json())
+.then(data => {
+    facilityLayers["短期大学"] = L.geoJSON(data, {
+        pointToLayer: (f, latlng) => {
+            const shape = shapeMap["短期大学"] || "circle";
+            const color = colorMap["茶"] || "blue";
+            const markerRadius = (shape === 'star') ? 12 : 8;
+            return new L.CustomMarker(latlng, {
+                renderer: myRenderer, shape: shape, radius: markerRadius,
+                fillColor: color, color: "white", weight: 1, fillOpacity: 0.9
+            }).bindPopup(`<strong>${f.properties["内容"] || "-"}</strong>`, { maxWidth: 260 });
+        },
+        onEachFeature: (f, l) => {
+            l.on('click', () => {
+                map.pm.disableDraw();
+                toggleTextMode(false);
+                if ('ontouchstart' in window) {
+                    document.getElementById('search-panel').style.display = 'none';
+                    document.getElementById('search-input').blur();
+                }
+            });
+        }
+    });
+})
+.catch(e => console.error("学校データ読込エラー: 短期大学", e));
+
+fetch("geo_22_大学.geojson")
+.then(res => res.json())
+.then(data => {
+    facilityLayers["大学"] = L.geoJSON(data, {
+        pointToLayer: (f, latlng) => {
+            const shape = shapeMap["大学"] || "circle";
+            const color = colorMap["茶"] || "blue";
+            const markerRadius = (shape === 'star') ? 12 : 8;
+            return new L.CustomMarker(latlng, {
+                renderer: myRenderer, shape: shape, radius: markerRadius,
+                fillColor: color, color: "white", weight: 1, fillOpacity: 0.9
+            }).bindPopup(`<strong>${f.properties["内容"] || "-"}</strong>`, { maxWidth: 260 });
+        },
+        onEachFeature: (f, l) => {
+            l.on('click', () => {
+                map.pm.disableDraw();
+                toggleTextMode(false);
+                if ('ontouchstart' in window) {
+                    document.getElementById('search-panel').style.display = 'none';
+                    document.getElementById('search-input').blur();
+                }
+            });
+        }
+    });
+})
+.catch(e => console.error("学校データ読込エラー: 大学", e));
+
+fetch("geo_22_幼稚園.geojson")
+.then(res => res.json())
+.then(data => {
+    facilityLayers["幼稚園"] = L.geoJSON(data, {
+        pointToLayer: (f, latlng) => {
+            const shape = shapeMap["幼稚園"] || "circle";
+            const color = colorMap["茶"] || "blue";
+            const markerRadius = (shape === 'star') ? 12 : 8;
+            return new L.CustomMarker(latlng, {
+                renderer: myRenderer, shape: shape, radius: markerRadius,
+                fillColor: color, color: "white", weight: 1, fillOpacity: 0.9
+            }).bindPopup(`<strong>${f.properties["内容"] || "-"}</strong>`, { maxWidth: 260 });
+        },
+        onEachFeature: (f, l) => {
+            l.on('click', () => {
+                map.pm.disableDraw();
+                toggleTextMode(false);
+                if ('ontouchstart' in window) {
+                    document.getElementById('search-panel').style.display = 'none';
+                    document.getElementById('search-input').blur();
+                }
+            });
+        }
+    });
+})
+.catch(e => console.error("学校データ読込エラー: 幼稚園", e));
+
+fetch("geo_22_特別支援学校.geojson")
+.then(res => res.json())
+.then(data => {
+    facilityLayers["特別支援学校"] = L.geoJSON(data, {
+        pointToLayer: (f, latlng) => {
+            const shape = shapeMap["特別支援学校"] || "circle";
+            const color = colorMap["茶"] || "blue";
+            const markerRadius = (shape === 'star') ? 12 : 8;
+            return new L.CustomMarker(latlng, {
+                renderer: myRenderer, shape: shape, radius: markerRadius,
+                fillColor: color, color: "white", weight: 1, fillOpacity: 0.9
+            }).bindPopup(`<strong>${f.properties["内容"] || "-"}</strong>`, { maxWidth: 260 });
+        },
+        onEachFeature: (f, l) => {
+            l.on('click', () => {
+                map.pm.disableDraw();
+                toggleTextMode(false);
+                if ('ontouchstart' in window) {
+                    document.getElementById('search-panel').style.display = 'none';
+                    document.getElementById('search-input').blur();
+                }
+            });
+        }
+    });
+})
+.catch(e => console.error("学校データ読込エラー: 特別支援学校", e));
+
+fetch("geo_22_幼保連携型認定こども園.geojson")
+.then(res => res.json())
+.then(data => {
+    facilityLayers["幼保連携型認定こども園"] = L.geoJSON(data, {
+        pointToLayer: (f, latlng) => {
+            const shape = shapeMap["幼保連携型認定こども園"] || "circle";
+            const color = colorMap["茶"] || "blue";
+            const markerRadius = (shape === 'star') ? 12 : 8;
+            return new L.CustomMarker(latlng, {
+                renderer: myRenderer, shape: shape, radius: markerRadius,
+                fillColor: color, color: "white", weight: 1, fillOpacity: 0.9
+            }).bindPopup(`<strong>${f.properties["内容"] || "-"}</strong>`, { maxWidth: 260 });
+        },
+        onEachFeature: (f, l) => {
+            l.on('click', () => {
+                map.pm.disableDraw();
+                toggleTextMode(false);
+                if ('ontouchstart' in window) {
+                    document.getElementById('search-panel').style.display = 'none';
+                    document.getElementById('search-input').blur();
+                }
+            });
+        }
+    });
+})
+.catch(e => console.error("学校データ読込エラー: 幼保連携型認定こども園", e));
+
+fetch("geo_22_義務教育学校.geojson")
+.then(res => res.json())
+.then(data => {
+    facilityLayers["義務教育学校"] = L.geoJSON(data, {
+        pointToLayer: (f, latlng) => {
+            const shape = shapeMap["義務教育学校"] || "circle";
+            const color = colorMap["茶"] || "blue";
+            const markerRadius = (shape === 'star') ? 12 : 8;
+            return new L.CustomMarker(latlng, {
+                renderer: myRenderer, shape: shape, radius: markerRadius,
+                fillColor: color, color: "white", weight: 1, fillOpacity: 0.9
+            }).bindPopup(`<strong>${f.properties["内容"] || "-"}</strong>`, { maxWidth: 260 });
+        },
+        onEachFeature: (f, l) => {
+            l.on('click', () => {
+                map.pm.disableDraw();
+                toggleTextMode(false);
+                if ('ontouchstart' in window) {
+                    document.getElementById('search-panel').style.display = 'none';
+                    document.getElementById('search-input').blur();
+                }
+            });
+        }
+    });
+})
+.catch(e => console.error("学校データ読込エラー: 義務教育学校", e));
+
+fetch("geo_22_各種学校.geojson")
+.then(res => res.json())
+.then(data => {
+    facilityLayers["各種学校"] = L.geoJSON(data, {
+        pointToLayer: (f, latlng) => {
+            const shape = shapeMap["各種学校"] || "circle";
+            const color = colorMap["茶"] || "blue";
+            const markerRadius = (shape === 'star') ? 12 : 8;
+            return new L.CustomMarker(latlng, {
+                renderer: myRenderer, shape: shape, radius: markerRadius,
+                fillColor: color, color: "white", weight: 1, fillOpacity: 0.9
+            }).bindPopup(`<strong>${f.properties["内容"] || "-"}</strong>`, { maxWidth: 260 });
+        },
+        onEachFeature: (f, l) => {
+            l.on('click', () => {
+                map.pm.disableDraw();
+                toggleTextMode(false);
+                if ('ontouchstart' in window) {
+                    document.getElementById('search-panel').style.display = 'none';
+                    document.getElementById('search-input').blur();
+                }
+            });
+        }
+    });
+})
+.catch(e => console.error("学校データ読込エラー: 各種学校", e));
+
+fetch("geo_22_専修学校.geojson")
+.then(res => res.json())
+.then(data => {
+    facilityLayers["専修学校"] = L.geoJSON(data, {
+        pointToLayer: (f, latlng) => {
+            const shape = shapeMap["専修学校"] || "circle";
+            const color = colorMap["茶"] || "blue";
+            const markerRadius = (shape === 'star') ? 12 : 8;
+            return new L.CustomMarker(latlng, {
+                renderer: myRenderer, shape: shape, radius: markerRadius,
+                fillColor: color, color: "white", weight: 1, fillOpacity: 0.9
+            }).bindPopup(`<strong>${f.properties["内容"] || "-"}</strong>`, { maxWidth: 260 });
+        },
+        onEachFeature: (f, l) => {
+            l.on('click', () => {
+                map.pm.disableDraw();
+                toggleTextMode(false);
+                if ('ontouchstart' in window) {
+                    document.getElementById('search-panel').style.display = 'none';
+                    document.getElementById('search-input').blur();
+                }
+            });
+        }
+    });
+})
+.catch(e => console.error("学校データ読込エラー: 専修学校", e));
+
     ['controls', 'search-panel', 'route-panel', 'text-config-panel', 'info-panel', 'hazard-legend'].forEach(id => {
         const el = document.getElementById(id);
         if (el) {
@@ -2746,6 +3115,22 @@ fetch("geo_22_バス停留所.geojson")
                     if (myRenderer && myRenderer._requestRedraw) {
                         myRenderer._requestRedraw();
                     }
+                }, 10);
+            } else {
+                map.removeLayer(g);
+            }
+        });
+    });
+
+    // ★学校専用のトグル処理
+    document.querySelectorAll('.school-toggle').forEach(cb => {
+        cb.addEventListener('change', function() {
+            const g = facilityLayers[this.value];
+            if (!g) return;
+            if (this.checked) {
+                g.addTo(map);
+                setTimeout(() => {
+                    if (myRenderer && myRenderer._requestRedraw) myRenderer._requestRedraw();
                 }, 10);
             } else {
                 map.removeLayer(g);
@@ -2819,7 +3204,7 @@ fetch("geo_22_バス停留所.geojson")
             facilityLayers[label].eachLayer(l => {
                 const name = (l.feature?.properties?.["内容"] || "").toLowerCase();
                 if(keywords.every(kw => name.includes(kw))) {
-                    const cb = document.querySelector(`.facility-toggle[value="${label}"], .bus-toggle[value="${label}"]`);
+                    const cb = document.querySelector(`.facility-toggle[value="${label}"], .bus-toggle[value="${label}"], .school-toggle[value="${label}"]`);
                     if (cb && !cb.checked) { cb.checked = true; }
                     if (!map.hasLayer(l)) { l.addTo(map); }
                     if (l.getLatLng) bounds.push(l.getLatLng());
@@ -3415,7 +3800,7 @@ fetch("geo_22_バス停留所.geojson")
                 addPrintBaseLayer(pm);
 
                 // 現在ONになっている施設・境界線を複製
-                document.querySelectorAll('.facility-toggle:checked,.bus-toggle:checked,.boundary-toggle:checked').forEach(cb=>{
+                document.querySelectorAll('.facility-toggle:checked,.bus-toggle:checked,.school-toggle:checked,.boundary-toggle:checked').forEach(cb=>{
                     const layer=(facilityLayers[cb.value]||boundaryLayers[cb.value]);
                     if(layer) cloneLayerForPrint(layer,pm);
                 });
