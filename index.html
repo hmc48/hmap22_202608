@@ -267,6 +267,8 @@ button.menu-sub-btn { flex: 1; padding: 8px; font-size: 11px; cursor: pointer; }
   padding:4px 8px; font-weight:bold; font-size:13px;
 }
 .print-page.portrait { width:793px; height:1122px; }
+.print-page.a3-landscape { width:1587px; height:1122px; }
+.print-page.a3-portrait { width:1122px; height:1587px; }
 .print-page-map { position:absolute; left:0; right:0; top:0; bottom:0; }
 .print-close {
   position:fixed; right:20px; top:15px; z-index:11000; padding:8px 14px;
@@ -275,14 +277,24 @@ button.menu-sub-btn { flex: 1; padding: 8px; font-size: 11px; cursor: pointer; }
 }
 .print-help { font-size:11px; color:#555; line-height:1.45; margin-top:6px; }
 @media print {
+  @page A4Landscape { size: A4 landscape; margin: 0; }
+  @page A4Portrait { size: A4 portrait; margin: 0; }
+  @page A3Landscape { size: A3 landscape; margin: 0; }
+  @page A3Portrait { size: A3 portrait; margin: 0; }
   body > *:not(#print-preview) { display:none !important; }
   #print-preview { display:block !important; position:static; padding:0; background:white; overflow:visible; }
   #print-preview-inner { display:block; }
   .print-page {
-    width:297mm; height:210mm; margin:0; box-shadow:none; page-break-after:always;
+    width:297mm; height:210mm; margin:0; box-shadow:none; page-break-after:always; page:A4Landscape;
   }
   .print-page.portrait {
-    width:210mm; height:297mm;
+    width:210mm; height:297mm; page:A4Portrait;
+  }
+  .print-page.a3-landscape {
+    width:420mm; height:297mm; page:A3Landscape;
+  }
+  .print-page.a3-portrait {
+    width:297mm; height:420mm; page:A3Portrait;
   }
   .print-page:last-child { page-break-after:auto; }
   .print-close { display:none !important; }
@@ -449,23 +461,27 @@ button.menu-sub-btn { flex: 1; padding: 8px; font-size: 11px; cursor: pointer; }
   <div id="print-panel">
     <span class="close-x" onclick="togglePrintPanel()">×</span>
     <div class="section-title">防災マップ印刷</div>
+    <div style="margin-top:8px;">用紙サイズ</div>
+    <select id="print-paper-size">
+      <option value="A4" selected>A4</option>
+      <option value="A3">A3</option>
+    </select>
     <div style="margin-top:8px;">分割数</div>
     <select id="print-grid-size">
-      <option value="2x2">A4 4枚（2×2）</option>
-      <option value="3x3" selected>A4 9枚（3×3）</option>
-      <option value="4x4">A4 16枚（4×4）</option>
+      <option value="2x2">2×2（4枚）</option>
+      <option value="3x3" selected>3×3（9枚）</option>
+      <option value="4x4">4×4（16枚）</option>
     </select>
     <div style="margin-top:8px;">用紙方向</div>
     <select id="print-orientation">
-      <option value="landscape" selected>A4横</option>
-      <option value="portrait">A4縦</option>
+      <option value="landscape" selected>横</option>
+      <option value="portrait">縦</option>
     </select>
     <button onclick="showPrintGrid()" style="background:#198754;color:white;border:0;">① 印刷範囲を表示</button>
     <button onclick="createPosterPrint()" style="background:#0d6efd;color:white;border:0;">② 分割印刷ページを作成</button>
     <div class="print-help">
-      現在の地図範囲を基準に、A4ページへ分割します。<br>
-      先に地図を移動・拡大縮小して、印刷したい範囲を表示してください。<br>
-      「②」を押すと印刷用の9ページが表示されます。
+      現在の地図範囲を基準に、選択した用紙サイズのページへ分割します。<br>
+      先に地図を移動・拡大縮小して、印刷したい範囲を表示してください。<br>      「②」を押すと選択した枚数の印刷ページが表示されます。
     </div>
   </div>
   <div id="print-grid-overlay"></div>
@@ -2931,7 +2947,7 @@ fetch("geo_22_バス停留所.geojson")
     }
   
     // ==========================================================
-    // 防災マップ A4 分割印刷
+    // 防災マップ A4 / A3 分割印刷
     // ==========================================================
     let printPreviewMaps = [];
 
@@ -3022,10 +3038,9 @@ fetch("geo_22_バス停留所.geojson")
             }
         }
 
+        const paperSize = document.getElementById('print-paper-size')?.value || 'A4';
         const orientationText =
-            document.getElementById('print-orientation').value === 'portrait'
-                ? 'A4縦'
-                : 'A4横';
+            `${paperSize}${document.getElementById('print-orientation').value === 'portrait' ? '縦' : '横'}`;
 
         alert(
             `${orientationText}・${data.cols}×${data.rows} の実際の印刷範囲を表示しました。
@@ -3191,8 +3206,9 @@ fetch("geo_22_バス停留所.geojson")
         const {cols, rows} = getPrintGrid();
         const orientation = document.getElementById('print-orientation').value;
 
-        // A4の実寸比率
-        // 横：297 / 210、縦：210 / 297
+        // A4・A3とも縦横比は同じ（横：297/210、A3：420/297）
+        // したがって地図の分割範囲は用紙サイズによらず同じ比率で計算する。
+        const paperSize = document.getElementById('print-paper-size')?.value || 'A4';
         const pageRatio = orientation === 'portrait'
             ? 210 / 297
             : 297 / 210;
@@ -3233,7 +3249,8 @@ fetch("geo_22_バス停留所.geojson")
             cols,
             rows,
             pageRatio,
-            orientation
+            orientation,
+            paperSize
         };
     }
 
@@ -3249,12 +3266,23 @@ fetch("geo_22_バス停留所.geojson")
 
         const pageW = data.pageRatio;
         const totalPages = data.cols * data.rows;
+        const isA3 = data.paperSize === 'A3';
+        const isPortrait = data.orientation === 'portrait';
+        // 画面上のプレビュー用サイズ（A4=約96dpi基準、A3は1.414倍）
+        const pageCssW = isA3
+            ? (isPortrait ? 1122 : 1587)
+            : (isPortrait ? 793 : 1122);
+        const pageCssH = isA3
+            ? (isPortrait ? 1587 : 1122)
+            : (isPortrait ? 1122 : 793);
 
         for(let r=0;r<data.rows;r++){
             for(let c=0;c<data.cols;c++){
                 const pageNo = r*data.cols+c+1;
                 const page = document.createElement('div');
-                page.className='print-page' + (document.getElementById('print-orientation').value === 'portrait' ? ' portrait' : '');
+                page.className = 'print-page'
+                    + (isPortrait ? ' portrait' : '')
+                    + (isA3 ? (isPortrait ? ' a3-portrait' : ' a3-landscape') : '');
                 page.style.aspectRatio = `${pageW}`;
                 const title=document.createElement('div');
                 title.className='print-page-title';
@@ -3281,9 +3309,6 @@ fetch("geo_22_バス停留所.geojson")
                 // 各A4ページが全体の1ページ分だけを表示するようズームを調整
                 const pagePixelW = data.totalW / data.cols;
                 const pagePixelH = data.totalH / data.rows;
-                const isPortrait = document.getElementById('print-orientation').value === 'portrait';
-                const pageCssW = isPortrait ? 793 : 1122;
-                const pageCssH = isPortrait ? 1122 : 793;
                 const scaleX = pageCssW / pagePixelW;
                 const scaleY = pageCssH / pagePixelH;
                 const pageZoom = data.zoom + Math.log2(Math.min(scaleX, scaleY));
