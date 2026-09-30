@@ -2727,10 +2727,54 @@ fetch("geo_22_小学校.geojson")
             const shape = shapeMap["小学校"] || "circle";
             const color = colorMap["緑"] || "blue";
             const markerRadius = (shape === 'star') ? 12 : 8;
+
+            // 学校GeoJSONの属性
+            // P29_003 = 学校分類コード
+            // P29_004 = 名称
+            // P29_005 = 所在地
+            // P29_006 = 管理者コード
+            // P29_007 = 休校コード
+            const schoolName = f.properties["P29_004"] || "-";
+            const schoolAddress = f.properties["P29_005"] || "-";
+            const schoolTypeCode = String(f.properties["P29_003"] ?? "").trim();
+            const schoolCode = f.properties["P29_002"] || "-";
+            const managerCode = String(f.properties["P29_006"] ?? "").trim();
+            const closedCode = String(f.properties["P29_007"] ?? "").trim();
+
+            const managerMap = {
+                "1": "国",
+                "2": "都道府県",
+                "3": "市区町村",
+                "4": "民間",
+                "0": "その他"
+            };
+
+            const closedMap = {
+                "0": "調査なし",
+                "1": "開校中",
+                "9": "休校中"
+            };
+
+            const managerText = managerMap[managerCode] || (managerCode ? managerCode : "-");
+            const closedText = closedMap[closedCode] || (closedCode ? closedCode : "-");
+
+            const popupContent = `
+                <div style="line-height:1.6;">
+                    <strong style="font-size:15px;">${schoolName}</strong><br>
+                    学校種別：小学校<br>
+                    学校分類コード：${schoolTypeCode || "-"}<br>
+                    学校コード：${schoolCode}<br>
+                    所在地：${schoolAddress}<br>
+                    管理者分類：${managerText}
+                    （コード：${managerCode || "-"}）<br>
+                    休校情報：${closedText}
+                    （コード：${closedCode || "-"}）
+                </div>`;
+
             return new L.CustomMarker(latlng, {
                 renderer: myRenderer, shape: shape, radius: markerRadius,
                 fillColor: color, color: "white", weight: 1, fillOpacity: 0.9
-            }).bindPopup(`<strong>${f.properties["内容"] || "-"}</strong>`, { maxWidth: 260 });
+            }).bindPopup(popupContent, { maxWidth: 360 });
         },
         onEachFeature: (f, l) => {
             l.on('click', () => {
@@ -2754,10 +2798,54 @@ fetch("geo_22_中学校.geojson")
             const shape = shapeMap["中学校"] || "circle";
             const color = colorMap["赤"] || "blue";
             const markerRadius = (shape === 'star') ? 12 : 8;
+
+            // 学校GeoJSONの属性
+            // P29_003 = 学校分類コード
+            // P29_004 = 名称
+            // P29_005 = 所在地
+            // P29_006 = 管理者コード
+            // P29_007 = 休校コード
+            const schoolName = f.properties["P29_004"] || "-";
+            const schoolAddress = f.properties["P29_005"] || "-";
+            const schoolTypeCode = String(f.properties["P29_003"] ?? "").trim();
+            const schoolCode = f.properties["P29_002"] || "-";
+            const managerCode = String(f.properties["P29_006"] ?? "").trim();
+            const closedCode = String(f.properties["P29_007"] ?? "").trim();
+
+            const managerMap = {
+                "1": "国",
+                "2": "都道府県",
+                "3": "市区町村",
+                "4": "民間",
+                "0": "その他"
+            };
+
+            const closedMap = {
+                "0": "調査なし",
+                "1": "開校中",
+                "9": "休校中"
+            };
+
+            const managerText = managerMap[managerCode] || (managerCode ? managerCode : "-");
+            const closedText = closedMap[closedCode] || (closedCode ? closedCode : "-");
+
+            const popupContent = `
+                <div style="line-height:1.6;">
+                    <strong style="font-size:15px;">${schoolName}</strong><br>
+                    学校種別：中学校<br>
+                    学校分類コード：${schoolTypeCode || "-"}<br>
+                    学校コード：${schoolCode}<br>
+                    所在地：${schoolAddress}<br>
+                    管理者分類：${managerText}
+                    （コード：${managerCode || "-"}）<br>
+                    休校情報：${closedText}
+                    （コード：${closedCode || "-"}）
+                </div>`;
+
             return new L.CustomMarker(latlng, {
                 renderer: myRenderer, shape: shape, radius: markerRadius,
                 fillColor: color, color: "white", weight: 1, fillOpacity: 0.9
-            }).bindPopup(`<strong>${f.properties["内容"] || "-"}</strong>`, { maxWidth: 260 });
+            }).bindPopup(popupContent, { maxWidth: 360 });
         },
         onEachFeature: (f, l) => {
             l.on('click', () => {
@@ -2781,10 +2869,54 @@ fetch("geo_22_中等教育学校.geojson")
             const shape = shapeMap["中等教育学校"] || "circle";
             const color = colorMap["茶"] || "blue";
             const markerRadius = (shape === 'star') ? 12 : 8;
+
+            // 学校GeoJSONの属性
+            // P29_003 = 学校分類コード
+            // P29_004 = 名称
+            // P29_005 = 所在地
+            // P29_006 = 管理者コード
+            // P29_007 = 休校コード
+            const schoolName = f.properties["P29_004"] || "-";
+            const schoolAddress = f.properties["P29_005"] || "-";
+            const schoolTypeCode = String(f.properties["P29_003"] ?? "").trim();
+            const schoolCode = f.properties["P29_002"] || "-";
+            const managerCode = String(f.properties["P29_006"] ?? "").trim();
+            const closedCode = String(f.properties["P29_007"] ?? "").trim();
+
+            const managerMap = {
+                "1": "国",
+                "2": "都道府県",
+                "3": "市区町村",
+                "4": "民間",
+                "0": "その他"
+            };
+
+            const closedMap = {
+                "0": "調査なし",
+                "1": "開校中",
+                "9": "休校中"
+            };
+
+            const managerText = managerMap[managerCode] || (managerCode ? managerCode : "-");
+            const closedText = closedMap[closedCode] || (closedCode ? closedCode : "-");
+
+            const popupContent = `
+                <div style="line-height:1.6;">
+                    <strong style="font-size:15px;">${schoolName}</strong><br>
+                    学校種別：中等教育学校<br>
+                    学校分類コード：${schoolTypeCode || "-"}<br>
+                    学校コード：${schoolCode}<br>
+                    所在地：${schoolAddress}<br>
+                    管理者分類：${managerText}
+                    （コード：${managerCode || "-"}）<br>
+                    休校情報：${closedText}
+                    （コード：${closedCode || "-"}）
+                </div>`;
+
             return new L.CustomMarker(latlng, {
                 renderer: myRenderer, shape: shape, radius: markerRadius,
                 fillColor: color, color: "white", weight: 1, fillOpacity: 0.9
-            }).bindPopup(`<strong>${f.properties["内容"] || "-"}</strong>`, { maxWidth: 260 });
+            }).bindPopup(popupContent, { maxWidth: 360 });
         },
         onEachFeature: (f, l) => {
             l.on('click', () => {
@@ -2808,10 +2940,54 @@ fetch("geo_22_高校.geojson")
             const shape = shapeMap["高校"] || "circle";
             const color = colorMap["青"] || "blue";
             const markerRadius = (shape === 'star') ? 12 : 8;
+
+            // 学校GeoJSONの属性
+            // P29_003 = 学校分類コード
+            // P29_004 = 名称
+            // P29_005 = 所在地
+            // P29_006 = 管理者コード
+            // P29_007 = 休校コード
+            const schoolName = f.properties["P29_004"] || "-";
+            const schoolAddress = f.properties["P29_005"] || "-";
+            const schoolTypeCode = String(f.properties["P29_003"] ?? "").trim();
+            const schoolCode = f.properties["P29_002"] || "-";
+            const managerCode = String(f.properties["P29_006"] ?? "").trim();
+            const closedCode = String(f.properties["P29_007"] ?? "").trim();
+
+            const managerMap = {
+                "1": "国",
+                "2": "都道府県",
+                "3": "市区町村",
+                "4": "民間",
+                "0": "その他"
+            };
+
+            const closedMap = {
+                "0": "調査なし",
+                "1": "開校中",
+                "9": "休校中"
+            };
+
+            const managerText = managerMap[managerCode] || (managerCode ? managerCode : "-");
+            const closedText = closedMap[closedCode] || (closedCode ? closedCode : "-");
+
+            const popupContent = `
+                <div style="line-height:1.6;">
+                    <strong style="font-size:15px;">${schoolName}</strong><br>
+                    学校種別：高校<br>
+                    学校分類コード：${schoolTypeCode || "-"}<br>
+                    学校コード：${schoolCode}<br>
+                    所在地：${schoolAddress}<br>
+                    管理者分類：${managerText}
+                    （コード：${managerCode || "-"}）<br>
+                    休校情報：${closedText}
+                    （コード：${closedCode || "-"}）
+                </div>`;
+
             return new L.CustomMarker(latlng, {
                 renderer: myRenderer, shape: shape, radius: markerRadius,
                 fillColor: color, color: "white", weight: 1, fillOpacity: 0.9
-            }).bindPopup(`<strong>${f.properties["内容"] || "-"}</strong>`, { maxWidth: 260 });
+            }).bindPopup(popupContent, { maxWidth: 360 });
         },
         onEachFeature: (f, l) => {
             l.on('click', () => {
@@ -2835,10 +3011,54 @@ fetch("geo_22_高等専門学校.geojson")
             const shape = shapeMap["高等専門学校"] || "circle";
             const color = colorMap["茶"] || "blue";
             const markerRadius = (shape === 'star') ? 12 : 8;
+
+            // 学校GeoJSONの属性
+            // P29_003 = 学校分類コード
+            // P29_004 = 名称
+            // P29_005 = 所在地
+            // P29_006 = 管理者コード
+            // P29_007 = 休校コード
+            const schoolName = f.properties["P29_004"] || "-";
+            const schoolAddress = f.properties["P29_005"] || "-";
+            const schoolTypeCode = String(f.properties["P29_003"] ?? "").trim();
+            const schoolCode = f.properties["P29_002"] || "-";
+            const managerCode = String(f.properties["P29_006"] ?? "").trim();
+            const closedCode = String(f.properties["P29_007"] ?? "").trim();
+
+            const managerMap = {
+                "1": "国",
+                "2": "都道府県",
+                "3": "市区町村",
+                "4": "民間",
+                "0": "その他"
+            };
+
+            const closedMap = {
+                "0": "調査なし",
+                "1": "開校中",
+                "9": "休校中"
+            };
+
+            const managerText = managerMap[managerCode] || (managerCode ? managerCode : "-");
+            const closedText = closedMap[closedCode] || (closedCode ? closedCode : "-");
+
+            const popupContent = `
+                <div style="line-height:1.6;">
+                    <strong style="font-size:15px;">${schoolName}</strong><br>
+                    学校種別：高等専門学校<br>
+                    学校分類コード：${schoolTypeCode || "-"}<br>
+                    学校コード：${schoolCode}<br>
+                    所在地：${schoolAddress}<br>
+                    管理者分類：${managerText}
+                    （コード：${managerCode || "-"}）<br>
+                    休校情報：${closedText}
+                    （コード：${closedCode || "-"}）
+                </div>`;
+
             return new L.CustomMarker(latlng, {
                 renderer: myRenderer, shape: shape, radius: markerRadius,
                 fillColor: color, color: "white", weight: 1, fillOpacity: 0.9
-            }).bindPopup(`<strong>${f.properties["内容"] || "-"}</strong>`, { maxWidth: 260 });
+            }).bindPopup(popupContent, { maxWidth: 360 });
         },
         onEachFeature: (f, l) => {
             l.on('click', () => {
@@ -2862,10 +3082,54 @@ fetch("geo_22_短期大学.geojson")
             const shape = shapeMap["短期大学"] || "circle";
             const color = colorMap["茶"] || "blue";
             const markerRadius = (shape === 'star') ? 12 : 8;
+
+            // 学校GeoJSONの属性
+            // P29_003 = 学校分類コード
+            // P29_004 = 名称
+            // P29_005 = 所在地
+            // P29_006 = 管理者コード
+            // P29_007 = 休校コード
+            const schoolName = f.properties["P29_004"] || "-";
+            const schoolAddress = f.properties["P29_005"] || "-";
+            const schoolTypeCode = String(f.properties["P29_003"] ?? "").trim();
+            const schoolCode = f.properties["P29_002"] || "-";
+            const managerCode = String(f.properties["P29_006"] ?? "").trim();
+            const closedCode = String(f.properties["P29_007"] ?? "").trim();
+
+            const managerMap = {
+                "1": "国",
+                "2": "都道府県",
+                "3": "市区町村",
+                "4": "民間",
+                "0": "その他"
+            };
+
+            const closedMap = {
+                "0": "調査なし",
+                "1": "開校中",
+                "9": "休校中"
+            };
+
+            const managerText = managerMap[managerCode] || (managerCode ? managerCode : "-");
+            const closedText = closedMap[closedCode] || (closedCode ? closedCode : "-");
+
+            const popupContent = `
+                <div style="line-height:1.6;">
+                    <strong style="font-size:15px;">${schoolName}</strong><br>
+                    学校種別：短期大学<br>
+                    学校分類コード：${schoolTypeCode || "-"}<br>
+                    学校コード：${schoolCode}<br>
+                    所在地：${schoolAddress}<br>
+                    管理者分類：${managerText}
+                    （コード：${managerCode || "-"}）<br>
+                    休校情報：${closedText}
+                    （コード：${closedCode || "-"}）
+                </div>`;
+
             return new L.CustomMarker(latlng, {
                 renderer: myRenderer, shape: shape, radius: markerRadius,
                 fillColor: color, color: "white", weight: 1, fillOpacity: 0.9
-            }).bindPopup(`<strong>${f.properties["内容"] || "-"}</strong>`, { maxWidth: 260 });
+            }).bindPopup(popupContent, { maxWidth: 360 });
         },
         onEachFeature: (f, l) => {
             l.on('click', () => {
@@ -2889,10 +3153,54 @@ fetch("geo_22_大学.geojson")
             const shape = shapeMap["大学"] || "circle";
             const color = colorMap["茶"] || "blue";
             const markerRadius = (shape === 'star') ? 12 : 8;
+
+            // 学校GeoJSONの属性
+            // P29_003 = 学校分類コード
+            // P29_004 = 名称
+            // P29_005 = 所在地
+            // P29_006 = 管理者コード
+            // P29_007 = 休校コード
+            const schoolName = f.properties["P29_004"] || "-";
+            const schoolAddress = f.properties["P29_005"] || "-";
+            const schoolTypeCode = String(f.properties["P29_003"] ?? "").trim();
+            const schoolCode = f.properties["P29_002"] || "-";
+            const managerCode = String(f.properties["P29_006"] ?? "").trim();
+            const closedCode = String(f.properties["P29_007"] ?? "").trim();
+
+            const managerMap = {
+                "1": "国",
+                "2": "都道府県",
+                "3": "市区町村",
+                "4": "民間",
+                "0": "その他"
+            };
+
+            const closedMap = {
+                "0": "調査なし",
+                "1": "開校中",
+                "9": "休校中"
+            };
+
+            const managerText = managerMap[managerCode] || (managerCode ? managerCode : "-");
+            const closedText = closedMap[closedCode] || (closedCode ? closedCode : "-");
+
+            const popupContent = `
+                <div style="line-height:1.6;">
+                    <strong style="font-size:15px;">${schoolName}</strong><br>
+                    学校種別：大学<br>
+                    学校分類コード：${schoolTypeCode || "-"}<br>
+                    学校コード：${schoolCode}<br>
+                    所在地：${schoolAddress}<br>
+                    管理者分類：${managerText}
+                    （コード：${managerCode || "-"}）<br>
+                    休校情報：${closedText}
+                    （コード：${closedCode || "-"}）
+                </div>`;
+
             return new L.CustomMarker(latlng, {
                 renderer: myRenderer, shape: shape, radius: markerRadius,
                 fillColor: color, color: "white", weight: 1, fillOpacity: 0.9
-            }).bindPopup(`<strong>${f.properties["内容"] || "-"}</strong>`, { maxWidth: 260 });
+            }).bindPopup(popupContent, { maxWidth: 360 });
         },
         onEachFeature: (f, l) => {
             l.on('click', () => {
@@ -2916,10 +3224,54 @@ fetch("geo_22_幼稚園.geojson")
             const shape = shapeMap["幼稚園"] || "circle";
             const color = colorMap["茶"] || "blue";
             const markerRadius = (shape === 'star') ? 12 : 8;
+
+            // 学校GeoJSONの属性
+            // P29_003 = 学校分類コード
+            // P29_004 = 名称
+            // P29_005 = 所在地
+            // P29_006 = 管理者コード
+            // P29_007 = 休校コード
+            const schoolName = f.properties["P29_004"] || "-";
+            const schoolAddress = f.properties["P29_005"] || "-";
+            const schoolTypeCode = String(f.properties["P29_003"] ?? "").trim();
+            const schoolCode = f.properties["P29_002"] || "-";
+            const managerCode = String(f.properties["P29_006"] ?? "").trim();
+            const closedCode = String(f.properties["P29_007"] ?? "").trim();
+
+            const managerMap = {
+                "1": "国",
+                "2": "都道府県",
+                "3": "市区町村",
+                "4": "民間",
+                "0": "その他"
+            };
+
+            const closedMap = {
+                "0": "調査なし",
+                "1": "開校中",
+                "9": "休校中"
+            };
+
+            const managerText = managerMap[managerCode] || (managerCode ? managerCode : "-");
+            const closedText = closedMap[closedCode] || (closedCode ? closedCode : "-");
+
+            const popupContent = `
+                <div style="line-height:1.6;">
+                    <strong style="font-size:15px;">${schoolName}</strong><br>
+                    学校種別：幼稚園<br>
+                    学校分類コード：${schoolTypeCode || "-"}<br>
+                    学校コード：${schoolCode}<br>
+                    所在地：${schoolAddress}<br>
+                    管理者分類：${managerText}
+                    （コード：${managerCode || "-"}）<br>
+                    休校情報：${closedText}
+                    （コード：${closedCode || "-"}）
+                </div>`;
+
             return new L.CustomMarker(latlng, {
                 renderer: myRenderer, shape: shape, radius: markerRadius,
                 fillColor: color, color: "white", weight: 1, fillOpacity: 0.9
-            }).bindPopup(`<strong>${f.properties["内容"] || "-"}</strong>`, { maxWidth: 260 });
+            }).bindPopup(popupContent, { maxWidth: 360 });
         },
         onEachFeature: (f, l) => {
             l.on('click', () => {
@@ -2943,10 +3295,54 @@ fetch("geo_22_特別支援学校.geojson")
             const shape = shapeMap["特別支援学校"] || "circle";
             const color = colorMap["茶"] || "blue";
             const markerRadius = (shape === 'star') ? 12 : 8;
+
+            // 学校GeoJSONの属性
+            // P29_003 = 学校分類コード
+            // P29_004 = 名称
+            // P29_005 = 所在地
+            // P29_006 = 管理者コード
+            // P29_007 = 休校コード
+            const schoolName = f.properties["P29_004"] || "-";
+            const schoolAddress = f.properties["P29_005"] || "-";
+            const schoolTypeCode = String(f.properties["P29_003"] ?? "").trim();
+            const schoolCode = f.properties["P29_002"] || "-";
+            const managerCode = String(f.properties["P29_006"] ?? "").trim();
+            const closedCode = String(f.properties["P29_007"] ?? "").trim();
+
+            const managerMap = {
+                "1": "国",
+                "2": "都道府県",
+                "3": "市区町村",
+                "4": "民間",
+                "0": "その他"
+            };
+
+            const closedMap = {
+                "0": "調査なし",
+                "1": "開校中",
+                "9": "休校中"
+            };
+
+            const managerText = managerMap[managerCode] || (managerCode ? managerCode : "-");
+            const closedText = closedMap[closedCode] || (closedCode ? closedCode : "-");
+
+            const popupContent = `
+                <div style="line-height:1.6;">
+                    <strong style="font-size:15px;">${schoolName}</strong><br>
+                    学校種別：特別支援学校<br>
+                    学校分類コード：${schoolTypeCode || "-"}<br>
+                    学校コード：${schoolCode}<br>
+                    所在地：${schoolAddress}<br>
+                    管理者分類：${managerText}
+                    （コード：${managerCode || "-"}）<br>
+                    休校情報：${closedText}
+                    （コード：${closedCode || "-"}）
+                </div>`;
+
             return new L.CustomMarker(latlng, {
                 renderer: myRenderer, shape: shape, radius: markerRadius,
                 fillColor: color, color: "white", weight: 1, fillOpacity: 0.9
-            }).bindPopup(`<strong>${f.properties["内容"] || "-"}</strong>`, { maxWidth: 260 });
+            }).bindPopup(popupContent, { maxWidth: 360 });
         },
         onEachFeature: (f, l) => {
             l.on('click', () => {
@@ -2970,10 +3366,54 @@ fetch("geo_22_幼保連携型認定こども園.geojson")
             const shape = shapeMap["幼保連携型認定こども園"] || "circle";
             const color = colorMap["茶"] || "blue";
             const markerRadius = (shape === 'star') ? 12 : 8;
+
+            // 学校GeoJSONの属性
+            // P29_003 = 学校分類コード
+            // P29_004 = 名称
+            // P29_005 = 所在地
+            // P29_006 = 管理者コード
+            // P29_007 = 休校コード
+            const schoolName = f.properties["P29_004"] || "-";
+            const schoolAddress = f.properties["P29_005"] || "-";
+            const schoolTypeCode = String(f.properties["P29_003"] ?? "").trim();
+            const schoolCode = f.properties["P29_002"] || "-";
+            const managerCode = String(f.properties["P29_006"] ?? "").trim();
+            const closedCode = String(f.properties["P29_007"] ?? "").trim();
+
+            const managerMap = {
+                "1": "国",
+                "2": "都道府県",
+                "3": "市区町村",
+                "4": "民間",
+                "0": "その他"
+            };
+
+            const closedMap = {
+                "0": "調査なし",
+                "1": "開校中",
+                "9": "休校中"
+            };
+
+            const managerText = managerMap[managerCode] || (managerCode ? managerCode : "-");
+            const closedText = closedMap[closedCode] || (closedCode ? closedCode : "-");
+
+            const popupContent = `
+                <div style="line-height:1.6;">
+                    <strong style="font-size:15px;">${schoolName}</strong><br>
+                    学校種別：幼保連携型認定こども園<br>
+                    学校分類コード：${schoolTypeCode || "-"}<br>
+                    学校コード：${schoolCode}<br>
+                    所在地：${schoolAddress}<br>
+                    管理者分類：${managerText}
+                    （コード：${managerCode || "-"}）<br>
+                    休校情報：${closedText}
+                    （コード：${closedCode || "-"}）
+                </div>`;
+
             return new L.CustomMarker(latlng, {
                 renderer: myRenderer, shape: shape, radius: markerRadius,
                 fillColor: color, color: "white", weight: 1, fillOpacity: 0.9
-            }).bindPopup(`<strong>${f.properties["内容"] || "-"}</strong>`, { maxWidth: 260 });
+            }).bindPopup(popupContent, { maxWidth: 360 });
         },
         onEachFeature: (f, l) => {
             l.on('click', () => {
@@ -2997,10 +3437,54 @@ fetch("geo_22_義務教育学校.geojson")
             const shape = shapeMap["義務教育学校"] || "circle";
             const color = colorMap["茶"] || "blue";
             const markerRadius = (shape === 'star') ? 12 : 8;
+
+            // 学校GeoJSONの属性
+            // P29_003 = 学校分類コード
+            // P29_004 = 名称
+            // P29_005 = 所在地
+            // P29_006 = 管理者コード
+            // P29_007 = 休校コード
+            const schoolName = f.properties["P29_004"] || "-";
+            const schoolAddress = f.properties["P29_005"] || "-";
+            const schoolTypeCode = String(f.properties["P29_003"] ?? "").trim();
+            const schoolCode = f.properties["P29_002"] || "-";
+            const managerCode = String(f.properties["P29_006"] ?? "").trim();
+            const closedCode = String(f.properties["P29_007"] ?? "").trim();
+
+            const managerMap = {
+                "1": "国",
+                "2": "都道府県",
+                "3": "市区町村",
+                "4": "民間",
+                "0": "その他"
+            };
+
+            const closedMap = {
+                "0": "調査なし",
+                "1": "開校中",
+                "9": "休校中"
+            };
+
+            const managerText = managerMap[managerCode] || (managerCode ? managerCode : "-");
+            const closedText = closedMap[closedCode] || (closedCode ? closedCode : "-");
+
+            const popupContent = `
+                <div style="line-height:1.6;">
+                    <strong style="font-size:15px;">${schoolName}</strong><br>
+                    学校種別：義務教育学校<br>
+                    学校分類コード：${schoolTypeCode || "-"}<br>
+                    学校コード：${schoolCode}<br>
+                    所在地：${schoolAddress}<br>
+                    管理者分類：${managerText}
+                    （コード：${managerCode || "-"}）<br>
+                    休校情報：${closedText}
+                    （コード：${closedCode || "-"}）
+                </div>`;
+
             return new L.CustomMarker(latlng, {
                 renderer: myRenderer, shape: shape, radius: markerRadius,
                 fillColor: color, color: "white", weight: 1, fillOpacity: 0.9
-            }).bindPopup(`<strong>${f.properties["内容"] || "-"}</strong>`, { maxWidth: 260 });
+            }).bindPopup(popupContent, { maxWidth: 360 });
         },
         onEachFeature: (f, l) => {
             l.on('click', () => {
@@ -3024,10 +3508,54 @@ fetch("geo_22_各種学校.geojson")
             const shape = shapeMap["各種学校"] || "circle";
             const color = colorMap["茶"] || "blue";
             const markerRadius = (shape === 'star') ? 12 : 8;
+
+            // 学校GeoJSONの属性
+            // P29_003 = 学校分類コード
+            // P29_004 = 名称
+            // P29_005 = 所在地
+            // P29_006 = 管理者コード
+            // P29_007 = 休校コード
+            const schoolName = f.properties["P29_004"] || "-";
+            const schoolAddress = f.properties["P29_005"] || "-";
+            const schoolTypeCode = String(f.properties["P29_003"] ?? "").trim();
+            const schoolCode = f.properties["P29_002"] || "-";
+            const managerCode = String(f.properties["P29_006"] ?? "").trim();
+            const closedCode = String(f.properties["P29_007"] ?? "").trim();
+
+            const managerMap = {
+                "1": "国",
+                "2": "都道府県",
+                "3": "市区町村",
+                "4": "民間",
+                "0": "その他"
+            };
+
+            const closedMap = {
+                "0": "調査なし",
+                "1": "開校中",
+                "9": "休校中"
+            };
+
+            const managerText = managerMap[managerCode] || (managerCode ? managerCode : "-");
+            const closedText = closedMap[closedCode] || (closedCode ? closedCode : "-");
+
+            const popupContent = `
+                <div style="line-height:1.6;">
+                    <strong style="font-size:15px;">${schoolName}</strong><br>
+                    学校種別：各種学校<br>
+                    学校分類コード：${schoolTypeCode || "-"}<br>
+                    学校コード：${schoolCode}<br>
+                    所在地：${schoolAddress}<br>
+                    管理者分類：${managerText}
+                    （コード：${managerCode || "-"}）<br>
+                    休校情報：${closedText}
+                    （コード：${closedCode || "-"}）
+                </div>`;
+
             return new L.CustomMarker(latlng, {
                 renderer: myRenderer, shape: shape, radius: markerRadius,
                 fillColor: color, color: "white", weight: 1, fillOpacity: 0.9
-            }).bindPopup(`<strong>${f.properties["内容"] || "-"}</strong>`, { maxWidth: 260 });
+            }).bindPopup(popupContent, { maxWidth: 360 });
         },
         onEachFeature: (f, l) => {
             l.on('click', () => {
@@ -3051,10 +3579,54 @@ fetch("geo_22_専修学校.geojson")
             const shape = shapeMap["専修学校"] || "circle";
             const color = colorMap["茶"] || "blue";
             const markerRadius = (shape === 'star') ? 12 : 8;
+
+            // 学校GeoJSONの属性
+            // P29_003 = 学校分類コード
+            // P29_004 = 名称
+            // P29_005 = 所在地
+            // P29_006 = 管理者コード
+            // P29_007 = 休校コード
+            const schoolName = f.properties["P29_004"] || "-";
+            const schoolAddress = f.properties["P29_005"] || "-";
+            const schoolTypeCode = String(f.properties["P29_003"] ?? "").trim();
+            const schoolCode = f.properties["P29_002"] || "-";
+            const managerCode = String(f.properties["P29_006"] ?? "").trim();
+            const closedCode = String(f.properties["P29_007"] ?? "").trim();
+
+            const managerMap = {
+                "1": "国",
+                "2": "都道府県",
+                "3": "市区町村",
+                "4": "民間",
+                "0": "その他"
+            };
+
+            const closedMap = {
+                "0": "調査なし",
+                "1": "開校中",
+                "9": "休校中"
+            };
+
+            const managerText = managerMap[managerCode] || (managerCode ? managerCode : "-");
+            const closedText = closedMap[closedCode] || (closedCode ? closedCode : "-");
+
+            const popupContent = `
+                <div style="line-height:1.6;">
+                    <strong style="font-size:15px;">${schoolName}</strong><br>
+                    学校種別：専修学校<br>
+                    学校分類コード：${schoolTypeCode || "-"}<br>
+                    学校コード：${schoolCode}<br>
+                    所在地：${schoolAddress}<br>
+                    管理者分類：${managerText}
+                    （コード：${managerCode || "-"}）<br>
+                    休校情報：${closedText}
+                    （コード：${closedCode || "-"}）
+                </div>`;
+
             return new L.CustomMarker(latlng, {
                 renderer: myRenderer, shape: shape, radius: markerRadius,
                 fillColor: color, color: "white", weight: 1, fillOpacity: 0.9
-            }).bindPopup(`<strong>${f.properties["内容"] || "-"}</strong>`, { maxWidth: 260 });
+            }).bindPopup(popupContent, { maxWidth: 360 });
         },
         onEachFeature: (f, l) => {
             l.on('click', () => {
