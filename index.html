@@ -114,18 +114,83 @@ body { margin:0; padding:0; overflow:hidden; font-family: sans-serif; }
 input[type="checkbox"], input[type="radio"] { margin-right: 10px; transform: scale(1.2); }
 
 .pm-color-picker-container {
-  margin-top: 5px !important;
-  border-top: 1px solid #ccc;
-  padding-top: 5px;
+  margin: 0 !important;
+  padding: 0;
+  border: 0;
+  width: 30px;
+  height: 30px;
+  position: relative;
 }
+
 .pm-color-btn {
-  width: 34px; height: 34px; background: white; border: 2px solid rgba(0,0,0,0.2);
-  border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center;
-  font-size: 18px; box sizing: border-box;
+  width: 30px;
+  height: 30px;
+  background: white;
+  border: 0;
+  border-radius: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  line-height: 30px;
+  box-sizing: border-box;
+  position: relative;
 }
+
 .pm-color-btn:hover { background: #f4f4f4; }
+
 #pm-color-input {
-  position: absolute; opacity: 0; width: 34px; height: 34px; cursor: pointer;
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+}
+
+.custom-action-grid {
+  width: 60px !important;
+  height: 60px !important;
+  display: grid !important;
+  grid-template-columns: 30px 30px;
+  grid-template-rows: 30px 30px;
+  margin-top: 10px !important;
+  box-sizing: border-box;
+}
+
+.custom-action-grid > a,
+.custom-action-grid > div {
+  width: 30px !important;
+  height: 30px !important;
+  min-width: 30px;
+  min-height: 30px;
+  padding: 0 !important;
+  margin: 0 !important;
+  box-sizing: border-box;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  border: 0 !important;
+  border-radius: 0 !important;
+}
+
+.custom-action-grid .pm-text-btn {
+  font-weight: bold;
+  font-size: 16px;
+  line-height: 30px;
+}
+
+.custom-action-grid .pm-image-btn,
+.custom-action-grid .pm-select-btn {
+  font-size: 17px;
+  line-height: 30px;
+}
+
+.custom-action-grid .pm-color-picker-container {
+  border: 0 !important;
+  border-top: 0 !important;
+  padding: 0 !important;
 }
 
 #text-config-panel {
@@ -697,46 +762,64 @@ button.menu-sub-btn { flex: 1; padding: 8px; font-size: 11px; cursor: pointer; }
     const CustomActionControl = L.Control.extend({
       options: { position: 'topright' },
       onAdd: function() {
-        const container = L.DomUtil.create('div', 'leaflet-bar');
-        container.style.marginTop = '10px';
-        
+        // 4つの操作アイコンを2×2で整列
+        // 上段：テキスト／カラーパレット
+        // 下段：画像の追加・編集／配置済み画像の選択
+        const container = L.DomUtil.create('div', 'leaflet-bar custom-action-grid');
+
         const textBtn = L.DomUtil.create('a', 'pm-text-btn', container);
         textBtn.innerHTML = 'Ｔ';
         textBtn.title = "テキストの追加";
-        textBtn.style.cssText = "cursor:pointer; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:16px;";
-        textBtn.onclick = (e) => { e.preventDefault(); toggleTextMode(!isTextMode); };
+        textBtn.style.cssText =
+          "cursor:pointer; display:flex; align-items:center; justify-content:center; " +
+          "font-weight:bold; font-size:16px; line-height:30px;";
+        textBtn.onclick = (e) => {
+          e.preventDefault();
+          toggleTextMode(!isTextMode);
+        };
 
+        // テキストアイコンの右隣にカラーパレットを配置
         const colorBtnContainer = L.DomUtil.create('div', 'pm-color-picker-container', container);
-        colorBtnContainer.style.marginTop = '0px';
         const btn = L.DomUtil.create('div', 'pm-color-btn', colorBtnContainer);
         btn.innerHTML = '🎨';
         btn.title = "描画色の変更";
-        
+
         const input = L.DomUtil.create('input', '', btn);
         input.type = 'color';
         input.id = 'pm-color-input';
         input.value = currentSelectedColor;
         input.oninput = (e) => {
           currentSelectedColor = e.target.value;
-          map.pm.setPathOptions({ color: currentSelectedColor, fillColor: currentSelectedColor, fillOpacity: 0.3 });
+          map.pm.setPathOptions({
+            color: currentSelectedColor,
+            fillColor: currentSelectedColor,
+            fillOpacity: 0.3
+          });
           btn.style.borderBottom = `10px solid ${currentSelectedColor}`;
         };
 
-        // 配置済み画像操作アイコン用の2列（横並び）コンテナ
-        const imgRowContainer = L.DomUtil.create('div', '', container);
-        imgRowContainer.style.cssText = "display: flex; border-top: 1px solid #ccc;";
-
-        const imgBtn = L.DomUtil.create('a', 'pm-image-btn', imgRowContainer);
+        // 下段：画像の追加・編集／配置済み画像の選択
+        const imgBtn = L.DomUtil.create('a', 'pm-image-btn', container);
         imgBtn.innerHTML = '🖼️';
         imgBtn.title = "画像の追加・編集";
-        imgBtn.style.cssText = "cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:18px; flex: 1; border-right: 1px solid #ccc; height: 30px;";
-        imgBtn.onclick = (e) => { e.preventDefault(); toggleImageMode(); };
+        imgBtn.style.cssText =
+          "cursor:pointer; display:flex; align-items:center; justify-content:center; " +
+          "font-size:17px; line-height:30px;";
+        imgBtn.onclick = (e) => {
+          e.preventDefault();
+          toggleImageMode();
+        };
 
-        const selBtn = L.DomUtil.create('a', 'pm-select-btn', imgRowContainer);
+        const selBtn = L.DomUtil.create('a', 'pm-select-btn', container);
         selBtn.innerHTML = '👆';
         selBtn.title = "配置済み画像を選択";
-        selBtn.style.cssText = "cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:18px; flex: 1; height: 30px;";
-        selBtn.onclick = (e) => { e.preventDefault(); startImageSelectionMode(); };
+        selBtn.style.cssText =
+          "cursor:pointer; display:flex; align-items:center; justify-content:center; " +
+          "font-size:17px; line-height:30px;";
+        selBtn.onclick = (e) => {
+          e.preventDefault();
+          startImageSelectionMode();
+        };
 
         L.DomEvent.disableClickPropagation(container);
         return container;
