@@ -2738,8 +2738,6 @@ fetch("geo_22_小学校.geojson")
             // P29_007 = 休校コード
             const schoolName = f.properties["P29_004"] || "-";
             const schoolAddress = f.properties["P29_005"] || "-";
-            const schoolTypeCode = String(f.properties["P29_003"] ?? "").trim();
-            const schoolCode = f.properties["P29_002"] || "-";
             const managerCode = String(f.properties["P29_006"] ?? "").trim();
             const closedCode = String(f.properties["P29_007"] ?? "").trim();
 
@@ -2764,13 +2762,9 @@ fetch("geo_22_小学校.geojson")
                 <div style="line-height:1.6;">
                     <strong style="font-size:15px;">${schoolName}</strong><br>
                     学校種別：小学校<br>
-                    学校分類コード：${schoolTypeCode || "-"}<br>
-                    学校コード：${schoolCode}<br>
                     所在地：${schoolAddress}<br>
-                    管理者分類：${managerText}
-                    （コード：${managerCode || "-"}）<br>
+                    管理者分類：${managerText}<br>
                     休校情報：${closedText}
-                    （コード：${closedCode || "-"}）
                 </div>`;
 
             return new L.CustomMarker(latlng, {
@@ -2809,8 +2803,6 @@ fetch("geo_22_中学校.geojson")
             // P29_007 = 休校コード
             const schoolName = f.properties["P29_004"] || "-";
             const schoolAddress = f.properties["P29_005"] || "-";
-            const schoolTypeCode = String(f.properties["P29_003"] ?? "").trim();
-            const schoolCode = f.properties["P29_002"] || "-";
             const managerCode = String(f.properties["P29_006"] ?? "").trim();
             const closedCode = String(f.properties["P29_007"] ?? "").trim();
 
@@ -2835,13 +2827,9 @@ fetch("geo_22_中学校.geojson")
                 <div style="line-height:1.6;">
                     <strong style="font-size:15px;">${schoolName}</strong><br>
                     学校種別：中学校<br>
-                    学校分類コード：${schoolTypeCode || "-"}<br>
-                    学校コード：${schoolCode}<br>
                     所在地：${schoolAddress}<br>
-                    管理者分類：${managerText}
-                    （コード：${managerCode || "-"}）<br>
+                    管理者分類：${managerText}<br>
                     休校情報：${closedText}
-                    （コード：${closedCode || "-"}）
                 </div>`;
 
             return new L.CustomMarker(latlng, {
@@ -2880,8 +2868,6 @@ fetch("geo_22_中等教育学校.geojson")
             // P29_007 = 休校コード
             const schoolName = f.properties["P29_004"] || "-";
             const schoolAddress = f.properties["P29_005"] || "-";
-            const schoolTypeCode = String(f.properties["P29_003"] ?? "").trim();
-            const schoolCode = f.properties["P29_002"] || "-";
             const managerCode = String(f.properties["P29_006"] ?? "").trim();
             const closedCode = String(f.properties["P29_007"] ?? "").trim();
 
@@ -2906,13 +2892,9 @@ fetch("geo_22_中等教育学校.geojson")
                 <div style="line-height:1.6;">
                     <strong style="font-size:15px;">${schoolName}</strong><br>
                     学校種別：中等教育学校<br>
-                    学校分類コード：${schoolTypeCode || "-"}<br>
-                    学校コード：${schoolCode}<br>
                     所在地：${schoolAddress}<br>
-                    管理者分類：${managerText}
-                    （コード：${managerCode || "-"}）<br>
+                    管理者分類：${managerText}<br>
                     休校情報：${closedText}
-                    （コード：${closedCode || "-"}）
                 </div>`;
 
             return new L.CustomMarker(latlng, {
@@ -2951,8 +2933,6 @@ fetch("geo_22_高校.geojson")
             // P29_007 = 休校コード
             const schoolName = f.properties["P29_004"] || "-";
             const schoolAddress = f.properties["P29_005"] || "-";
-            const schoolTypeCode = String(f.properties["P29_003"] ?? "").trim();
-            const schoolCode = f.properties["P29_002"] || "-";
             const managerCode = String(f.properties["P29_006"] ?? "").trim();
             const closedCode = String(f.properties["P29_007"] ?? "").trim();
 
@@ -2977,13 +2957,9 @@ fetch("geo_22_高校.geojson")
                 <div style="line-height:1.6;">
                     <strong style="font-size:15px;">${schoolName}</strong><br>
                     学校種別：高校<br>
-                    学校分類コード：${schoolTypeCode || "-"}<br>
-                    学校コード：${schoolCode}<br>
                     所在地：${schoolAddress}<br>
-                    管理者分類：${managerText}
-                    （コード：${managerCode || "-"}）<br>
+                    管理者分類：${managerText}<br>
                     休校情報：${closedText}
-                    （コード：${closedCode || "-"}）
                 </div>`;
 
             return new L.CustomMarker(latlng, {
@@ -3022,8 +2998,6 @@ fetch("geo_22_高等専門学校.geojson")
             // P29_007 = 休校コード
             const schoolName = f.properties["P29_004"] || "-";
             const schoolAddress = f.properties["P29_005"] || "-";
-            const schoolTypeCode = String(f.properties["P29_003"] ?? "").trim();
-            const schoolCode = f.properties["P29_002"] || "-";
             const managerCode = String(f.properties["P29_006"] ?? "").trim();
             const closedCode = String(f.properties["P29_007"] ?? "").trim();
 
@@ -3048,13 +3022,9 @@ fetch("geo_22_高等専門学校.geojson")
                 <div style="line-height:1.6;">
                     <strong style="font-size:15px;">${schoolName}</strong><br>
                     学校種別：高等専門学校<br>
-                    学校分類コード：${schoolTypeCode || "-"}<br>
-                    学校コード：${schoolCode}<br>
                     所在地：${schoolAddress}<br>
-                    管理者分類：${managerText}
-                    （コード：${managerCode || "-"}）<br>
+                    管理者分類：${managerText}<br>
                     休校情報：${closedText}
-                    （コード：${closedCode || "-"}）
                 </div>`;
 
             return new L.CustomMarker(latlng, {
@@ -3093,8 +3063,6 @@ fetch("geo_22_短期大学.geojson")
             // P29_007 = 休校コード
             const schoolName = f.properties["P29_004"] || "-";
             const schoolAddress = f.properties["P29_005"] || "-";
-            const schoolTypeCode = String(f.properties["P29_003"] ?? "").trim();
-            const schoolCode = f.properties["P29_002"] || "-";
             const managerCode = String(f.properties["P29_006"] ?? "").trim();
             const closedCode = String(f.properties["P29_007"] ?? "").trim();
 
@@ -3119,13 +3087,9 @@ fetch("geo_22_短期大学.geojson")
                 <div style="line-height:1.6;">
                     <strong style="font-size:15px;">${schoolName}</strong><br>
                     学校種別：短期大学<br>
-                    学校分類コード：${schoolTypeCode || "-"}<br>
-                    学校コード：${schoolCode}<br>
                     所在地：${schoolAddress}<br>
-                    管理者分類：${managerText}
-                    （コード：${managerCode || "-"}）<br>
+                    管理者分類：${managerText}<br>
                     休校情報：${closedText}
-                    （コード：${closedCode || "-"}）
                 </div>`;
 
             return new L.CustomMarker(latlng, {
@@ -3164,8 +3128,6 @@ fetch("geo_22_大学.geojson")
             // P29_007 = 休校コード
             const schoolName = f.properties["P29_004"] || "-";
             const schoolAddress = f.properties["P29_005"] || "-";
-            const schoolTypeCode = String(f.properties["P29_003"] ?? "").trim();
-            const schoolCode = f.properties["P29_002"] || "-";
             const managerCode = String(f.properties["P29_006"] ?? "").trim();
             const closedCode = String(f.properties["P29_007"] ?? "").trim();
 
@@ -3190,13 +3152,9 @@ fetch("geo_22_大学.geojson")
                 <div style="line-height:1.6;">
                     <strong style="font-size:15px;">${schoolName}</strong><br>
                     学校種別：大学<br>
-                    学校分類コード：${schoolTypeCode || "-"}<br>
-                    学校コード：${schoolCode}<br>
                     所在地：${schoolAddress}<br>
-                    管理者分類：${managerText}
-                    （コード：${managerCode || "-"}）<br>
+                    管理者分類：${managerText}<br>
                     休校情報：${closedText}
-                    （コード：${closedCode || "-"}）
                 </div>`;
 
             return new L.CustomMarker(latlng, {
@@ -3235,8 +3193,6 @@ fetch("geo_22_幼稚園.geojson")
             // P29_007 = 休校コード
             const schoolName = f.properties["P29_004"] || "-";
             const schoolAddress = f.properties["P29_005"] || "-";
-            const schoolTypeCode = String(f.properties["P29_003"] ?? "").trim();
-            const schoolCode = f.properties["P29_002"] || "-";
             const managerCode = String(f.properties["P29_006"] ?? "").trim();
             const closedCode = String(f.properties["P29_007"] ?? "").trim();
 
@@ -3261,13 +3217,9 @@ fetch("geo_22_幼稚園.geojson")
                 <div style="line-height:1.6;">
                     <strong style="font-size:15px;">${schoolName}</strong><br>
                     学校種別：幼稚園<br>
-                    学校分類コード：${schoolTypeCode || "-"}<br>
-                    学校コード：${schoolCode}<br>
                     所在地：${schoolAddress}<br>
-                    管理者分類：${managerText}
-                    （コード：${managerCode || "-"}）<br>
+                    管理者分類：${managerText}<br>
                     休校情報：${closedText}
-                    （コード：${closedCode || "-"}）
                 </div>`;
 
             return new L.CustomMarker(latlng, {
@@ -3306,8 +3258,6 @@ fetch("geo_22_特別支援学校.geojson")
             // P29_007 = 休校コード
             const schoolName = f.properties["P29_004"] || "-";
             const schoolAddress = f.properties["P29_005"] || "-";
-            const schoolTypeCode = String(f.properties["P29_003"] ?? "").trim();
-            const schoolCode = f.properties["P29_002"] || "-";
             const managerCode = String(f.properties["P29_006"] ?? "").trim();
             const closedCode = String(f.properties["P29_007"] ?? "").trim();
 
@@ -3332,13 +3282,9 @@ fetch("geo_22_特別支援学校.geojson")
                 <div style="line-height:1.6;">
                     <strong style="font-size:15px;">${schoolName}</strong><br>
                     学校種別：特別支援学校<br>
-                    学校分類コード：${schoolTypeCode || "-"}<br>
-                    学校コード：${schoolCode}<br>
                     所在地：${schoolAddress}<br>
-                    管理者分類：${managerText}
-                    （コード：${managerCode || "-"}）<br>
+                    管理者分類：${managerText}<br>
                     休校情報：${closedText}
-                    （コード：${closedCode || "-"}）
                 </div>`;
 
             return new L.CustomMarker(latlng, {
@@ -3377,8 +3323,6 @@ fetch("geo_22_幼保連携型認定こども園.geojson")
             // P29_007 = 休校コード
             const schoolName = f.properties["P29_004"] || "-";
             const schoolAddress = f.properties["P29_005"] || "-";
-            const schoolTypeCode = String(f.properties["P29_003"] ?? "").trim();
-            const schoolCode = f.properties["P29_002"] || "-";
             const managerCode = String(f.properties["P29_006"] ?? "").trim();
             const closedCode = String(f.properties["P29_007"] ?? "").trim();
 
@@ -3403,13 +3347,9 @@ fetch("geo_22_幼保連携型認定こども園.geojson")
                 <div style="line-height:1.6;">
                     <strong style="font-size:15px;">${schoolName}</strong><br>
                     学校種別：幼保連携型認定こども園<br>
-                    学校分類コード：${schoolTypeCode || "-"}<br>
-                    学校コード：${schoolCode}<br>
                     所在地：${schoolAddress}<br>
-                    管理者分類：${managerText}
-                    （コード：${managerCode || "-"}）<br>
+                    管理者分類：${managerText}<br>
                     休校情報：${closedText}
-                    （コード：${closedCode || "-"}）
                 </div>`;
 
             return new L.CustomMarker(latlng, {
@@ -3448,8 +3388,6 @@ fetch("geo_22_義務教育学校.geojson")
             // P29_007 = 休校コード
             const schoolName = f.properties["P29_004"] || "-";
             const schoolAddress = f.properties["P29_005"] || "-";
-            const schoolTypeCode = String(f.properties["P29_003"] ?? "").trim();
-            const schoolCode = f.properties["P29_002"] || "-";
             const managerCode = String(f.properties["P29_006"] ?? "").trim();
             const closedCode = String(f.properties["P29_007"] ?? "").trim();
 
@@ -3474,13 +3412,9 @@ fetch("geo_22_義務教育学校.geojson")
                 <div style="line-height:1.6;">
                     <strong style="font-size:15px;">${schoolName}</strong><br>
                     学校種別：義務教育学校<br>
-                    学校分類コード：${schoolTypeCode || "-"}<br>
-                    学校コード：${schoolCode}<br>
                     所在地：${schoolAddress}<br>
-                    管理者分類：${managerText}
-                    （コード：${managerCode || "-"}）<br>
+                    管理者分類：${managerText}<br>
                     休校情報：${closedText}
-                    （コード：${closedCode || "-"}）
                 </div>`;
 
             return new L.CustomMarker(latlng, {
@@ -3519,8 +3453,6 @@ fetch("geo_22_各種学校.geojson")
             // P29_007 = 休校コード
             const schoolName = f.properties["P29_004"] || "-";
             const schoolAddress = f.properties["P29_005"] || "-";
-            const schoolTypeCode = String(f.properties["P29_003"] ?? "").trim();
-            const schoolCode = f.properties["P29_002"] || "-";
             const managerCode = String(f.properties["P29_006"] ?? "").trim();
             const closedCode = String(f.properties["P29_007"] ?? "").trim();
 
@@ -3545,13 +3477,9 @@ fetch("geo_22_各種学校.geojson")
                 <div style="line-height:1.6;">
                     <strong style="font-size:15px;">${schoolName}</strong><br>
                     学校種別：各種学校<br>
-                    学校分類コード：${schoolTypeCode || "-"}<br>
-                    学校コード：${schoolCode}<br>
                     所在地：${schoolAddress}<br>
-                    管理者分類：${managerText}
-                    （コード：${managerCode || "-"}）<br>
+                    管理者分類：${managerText}<br>
                     休校情報：${closedText}
-                    （コード：${closedCode || "-"}）
                 </div>`;
 
             return new L.CustomMarker(latlng, {
@@ -3590,8 +3518,6 @@ fetch("geo_22_専修学校.geojson")
             // P29_007 = 休校コード
             const schoolName = f.properties["P29_004"] || "-";
             const schoolAddress = f.properties["P29_005"] || "-";
-            const schoolTypeCode = String(f.properties["P29_003"] ?? "").trim();
-            const schoolCode = f.properties["P29_002"] || "-";
             const managerCode = String(f.properties["P29_006"] ?? "").trim();
             const closedCode = String(f.properties["P29_007"] ?? "").trim();
 
@@ -3616,13 +3542,9 @@ fetch("geo_22_専修学校.geojson")
                 <div style="line-height:1.6;">
                     <strong style="font-size:15px;">${schoolName}</strong><br>
                     学校種別：専修学校<br>
-                    学校分類コード：${schoolTypeCode || "-"}<br>
-                    学校コード：${schoolCode}<br>
                     所在地：${schoolAddress}<br>
-                    管理者分類：${managerText}
-                    （コード：${managerCode || "-"}）<br>
+                    管理者分類：${managerText}<br>
                     休校情報：${closedText}
-                    （コード：${closedCode || "-"}）
                 </div>`;
 
             return new L.CustomMarker(latlng, {
